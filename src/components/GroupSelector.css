@@ -5,7 +5,8 @@
   border-right: 1px solid #eaecf0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .selector-mode-tabs {
@@ -177,7 +178,6 @@
 
 .group-content {
   flex: 1;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
