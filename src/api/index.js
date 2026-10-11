@@ -246,29 +246,41 @@ function getColorForEventType(type) {
 export function transformApiDataToEvents(apiData) {
   if (!apiData || !Array.isArray(apiData)) return [];
 
-  return apiData.map((item, index) => ({
-    id: item.idReservation || item.id || index,
-    title: item.name || item.title || "Sans titre",
-    start: new Date(item.startDate || item.start),
-    end: new Date(item.endDate || item.end),
-    color: getColorForEventType(item.typeName),
-    description: item.description || "",
-    location: item.rooms ? item.rooms.map((r) => r.name).join(", ") : "",
-    teacher:
+  return apiData.map((item, index) => {
+    const teachersList =
       item.teachers && item.teachers.length > 0
         ? item.teachers
             .map((t) =>
-              t.firstname && t.name
-                ? `${t.firstname} ${t.name}`
-                : t.name || t.firstname || "",
+              typeof t === "string"
+                ? t
+                : t.firstname && t.name
+                  ? `${t.firstname} ${t.name}`
+                  : t.name || t.firstname || "",
             )
-            .join(", ")
-        : "",
-    type: item.typeName || "",
-    groups: item.groups ? item.groups.map((g) => g.name) : [],
-    rooms: item.rooms || [],
-    isOnline: item.isOnline || false,
-  }));
+            .map((name) => name.trim())
+            .filter(Boolean)
+        : item.teacher
+          ? (Array.isArray(item.teacher) ? item.teacher : item.teacher.split(","))
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : [];
+
+    return {
+      id: item.idReservation || item.id || index,
+      title: item.name || item.title || "Sans titre",
+      start: new Date(item.startDate || item.start),
+      end: new Date(item.endDate || item.end),
+      color: getColorForEventType(item.typeName),
+      description: item.description || "",
+      location: item.rooms ? item.rooms.map((r) => r.name).join(", ") : "",
+      teacher: teachersList.join(", "),
+      teachers: teachersList,
+      type: item.typeName || "",
+      groups: item.groups ? item.groups.map((g) => g.name) : [],
+      rooms: item.rooms || [],
+      isOnline: item.isOnline || false,
+    };
+  });
 }
 
 // Generate random color for events

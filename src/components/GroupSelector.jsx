@@ -12,6 +12,9 @@ const GroupSelector = ({
   availableRooms = [],
   selectedRooms = [],
   onRoomsChange = () => {},
+  availableTeachers = [],
+  selectedTeachers = [],
+  onTeachersChange = () => {},
   onSelectionModeChange = () => {},
 }) => {
   const [allGroups, setAllGroups] = useState([]);
@@ -70,6 +73,10 @@ const GroupSelector = ({
     room.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  const filteredTeachers = availableTeachers.filter((teacher) =>
+    teacher.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   const selectedGroupsData = allGroups.filter((group) =>
     selectedGroups.includes(group.id),
   );
@@ -86,6 +93,14 @@ const GroupSelector = ({
     (room) => !selectedRooms.includes(room),
   );
 
+  const selectedTeachersData = availableTeachers.filter((teacher) =>
+    selectedTeachers.includes(teacher),
+  );
+
+  const unselectedFilteredTeachers = filteredTeachers.filter(
+    (teacher) => !selectedTeachers.includes(teacher),
+  );
+
   const handleGroupToggle = (groupId) => {
     const isSelected = selectedGroups.includes(groupId);
     const newSelectedGroups = isSelected
@@ -99,6 +114,12 @@ const GroupSelector = ({
     const isSelected = selectedRooms.includes(roomName);
     const newSelectedRooms = isSelected ? [] : [roomName];
     onRoomsChange(newSelectedRooms);
+  };
+
+  const handleTeacherToggle = (teacherName) => {
+    const isSelected = selectedTeachers.includes(teacherName);
+    const newSelectedTeachers = isSelected ? [] : [teacherName];
+    onTeachersChange(newSelectedTeachers);
   };
 
   const handleSelectionMode = (nextMode) => {
@@ -176,6 +197,12 @@ const GroupSelector = ({
         >
           Salles
         </button>
+        <button
+          className={`mode-tab ${selectionMode === "teachers" ? "active" : ""}`}
+          onClick={() => handleSelectionMode("teachers")}
+        >
+          Enseignants
+        </button>
       </div>
 
       <div className="group-search">
@@ -186,6 +213,8 @@ const GroupSelector = ({
             placeholder={
               selectionMode === "groups"
                 ? "Rechercher un groupe..."
+                : selectionMode === "teachers"
+                ? "Rechercher un enseignant..."
                 : "Rechercher une salle..."
             }
             value={searchQuery}
@@ -196,6 +225,12 @@ const GroupSelector = ({
         {selectionMode === "rooms" && highestHierarchyGroup && (
           <p className="room-scope-hint">
             Mode salle: scope auto sur le groupe racine "
+            {highestHierarchyGroup.name}".
+          </p>
+        )}
+        {selectionMode === "teachers" && highestHierarchyGroup && (
+          <p className="room-scope-hint">
+            Mode enseignant: scope auto sur le groupe racine "
             {highestHierarchyGroup.name}".
           </p>
         )}
@@ -283,11 +318,43 @@ const GroupSelector = ({
           </div>
         )}
 
+        {selectionMode === "teachers" && selectedTeachersData.length > 0 && (
+          <div className="selected-section">
+            <div className="section-header">
+              <span className="section-title">Enseignants selectionnes</span>
+              <button
+                className="clear-all-btn"
+                onClick={() => onTeachersChange([])}
+                title="Tout deselelectionner"
+              >
+                Effacer tout
+              </button>
+            </div>
+            <div className="selected-groups">
+              {selectedTeachersData.map((teacher) => (
+                <div key={teacher} className="selected-group-item">
+                  <Check color="#7f56d9" size={16} />
+                  <span className="group-name">{teacher}</span>
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleTeacherToggle(teacher)}
+                    title="Retirer"
+                  >
+                    <Trash size={16} color="#667085" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="all-groups-section">
           <div className="section-header">
             <span className="section-title">
               {selectionMode === "groups"
                 ? "Tous les groupes"
+                : selectionMode === "teachers"
+                ? "Tous les enseignants"
                 : "Toutes les salles"}
             </span>
           </div>
@@ -315,6 +382,31 @@ const GroupSelector = ({
                       {group.path && (
                         <span className="group-path">{group.path}</span>
                       )}
+                    </div>
+                    <button className="add-btn" title="Ajouter">
+                      <Plus size={16} strokeWidth={2} />
+                    </button>
+                  </div>
+                ))
+              )
+            ) : selectionMode === "teachers" ? (
+              unselectedFilteredTeachers.length === 0 ? (
+                <div className="no-groups">
+                  <p>
+                    {availableTeachers.length === 0
+                      ? "Aucun enseignant detecte sur cette plage"
+                      : "Aucun enseignant trouve"}
+                  </p>
+                </div>
+              ) : (
+                unselectedFilteredTeachers.map((teacher) => (
+                  <div
+                    key={teacher}
+                    className="group-item"
+                    onClick={() => handleTeacherToggle(teacher)}
+                  >
+                    <div className="group-info">
+                      <span className="group-name">{teacher}</span>
                     </div>
                     <button className="add-btn" title="Ajouter">
                       <Plus size={16} strokeWidth={2} />

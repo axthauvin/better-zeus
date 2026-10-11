@@ -50,6 +50,7 @@ const CalendarContainer = () => {
     getEnabledGroups() || getSavedGroups() || [],
   );
   const [selectedRooms, setSelectedRooms] = useState([]);
+  const [selectedTeachers, setSelectedTeachers] = useState([]);
   const [selectionMode, setSelectionMode] = useState("groups");
   const [eventSearchQuery, setEventSearchQuery] = useState("");
   const [isCalendarExportOpen, setIsCalendarExportOpen] = useState(false);
@@ -97,7 +98,8 @@ const CalendarContainer = () => {
 
   const rootGroup = getHighestHierarchyGroup();
   const activeGroups = React.useMemo(() => {
-    return selectionMode === "rooms" && rootGroup
+    return (selectionMode === "rooms" || selectionMode === "teachers") &&
+      rootGroup
       ? [rootGroup.id]
       : enabledGroups;
   }, [selectionMode, enabledGroups, rootGroup?.id]);
@@ -197,7 +199,7 @@ const CalendarContainer = () => {
       endDate = endOfDay(currentDate);
     }
     loadEvents(startDate, endDate, activeGroups);
-  }, [activeGroups]);
+  }, [activeGroups, selectionMode]);
 
   const handleViewChange = (newView) => {
     setView(newView);
@@ -294,6 +296,27 @@ const CalendarContainer = () => {
     ),
   ).sort((a, b) => a.localeCompare(b, "fr"));
 
+  const availableTeachers = React.useMemo(() => {
+    return Array.from(
+      new Set(
+        allCombinedEvents
+          .flatMap((event) => {
+            if (Array.isArray(event.teachers) && event.teachers.length > 0) {
+              return event.teachers;
+            }
+            if (typeof event.teacher === "string" && event.teacher.trim()) {
+              return event.teacher
+                .split(",")
+                .map((t) => t.trim())
+                .filter(Boolean);
+            }
+            return [];
+          })
+          .filter(Boolean),
+      ),
+    ).sort((a, b) => a.localeCompare(b, "fr"));
+  }, [allCombinedEvents]);
+
   const filteredEvents = allCombinedEvents.filter((event) => {
     const roomFilterEnabled = selectionMode === "rooms";
     const hasSelectedRoom = selectedRooms.length > 0;
@@ -310,6 +333,28 @@ const CalendarContainer = () => {
       return false;
     }
 
+    const teacherFilterEnabled = selectionMode === "teachers";
+    const hasSelectedTeacher = selectedTeachers.length > 0;
+
+    if (teacherFilterEnabled && !hasSelectedTeacher) {
+      return false;
+    }
+
+    const eventTeachers =
+      Array.isArray(event.teachers) && event.teachers.length > 0
+        ? event.teachers
+        : typeof event.teacher === "string" && event.teacher.trim()
+          ? event.teacher.split(",").map((t) => t.trim())
+          : [];
+
+    const teacherMatch =
+      !teacherFilterEnabled ||
+      eventTeachers.some((teacher) => selectedTeachers.includes(teacher));
+
+    if (!teacherMatch) {
+      return false;
+    }
+
     if (!eventSearchQuery.trim()) {
       return true;
     }
@@ -322,6 +367,7 @@ const CalendarContainer = () => {
       event.type,
       ...(event.groups || []),
       ...(event.rooms || []).map((room) => room?.name || ""),
+      ...eventTeachers,
     ];
 
     return searchableFields.some((value) =>
@@ -381,6 +427,9 @@ const CalendarContainer = () => {
           availableRooms={availableRooms}
           selectedRooms={selectedRooms}
           onRoomsChange={setSelectedRooms}
+          availableTeachers={availableTeachers}
+          selectedTeachers={selectedTeachers}
+          onTeachersChange={setSelectedTeachers}
           onSelectionModeChange={handleSelectionModeChange}
         />
       </aside>
