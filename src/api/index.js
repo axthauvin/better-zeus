@@ -82,7 +82,6 @@ export async function fetchTimeTable(
     if (!authToken) {
       throw new Error("No auth token available");
     }
-    console.log("Fetching timetable with auth token:", authToken);
 
     // Make parallel requests for each group
     const requests = groupsId.map((groupId) => {
@@ -91,8 +90,6 @@ export async function fetchTimeTable(
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
       });
-
-      console.log(`${API_BASE_URL}?${params.toString()}`);
 
       return fetch(`${API_BASE_URL}?${params.toString()}`, {
         headers: {
@@ -198,8 +195,6 @@ export async function fetchReservationDetails(reservationId) {
 export async function fetchCalendarExportToken() {
   const login = getZeusLoginFromAuth();
 
-  console.log("Fetching calendar export token for login:", login);
-
   const authToken = getAuth();
   if (!authToken) {
     throw new Error("No auth token available");
@@ -215,8 +210,6 @@ export async function fetchCalendarExportToken() {
     },
     body: `"${login}"`,
   });
-
-  console.log("Calendar export token response:", response);
 
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`);
@@ -323,8 +316,6 @@ export function getUserGroups() {
     }
 
     groups.values.forEach(traverse);
-
-    console.log("All groups extracted:", allGroups);
 
     return allGroups;
   } catch (error) {

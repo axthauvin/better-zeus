@@ -161,7 +161,6 @@ const CalendarContainer = () => {
 
       // If no groups selected, clear events
       if (!groups || groups.length === 0) {
-        console.log("No groups selected");
         setEvents([]);
         setLoading(false);
         return;

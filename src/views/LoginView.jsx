@@ -38,7 +38,6 @@ const LoginView = () => {
     // Find the Office 365 login button
     const findOfficeButton = () => {
       const buttons = document.querySelectorAll("button, a");
-      console.log(buttons);
       for (const btn of buttons) {
         const imgInside = btn.querySelector("img");
         if (imgInside.src.includes("office")) return btn;
