@@ -4,7 +4,7 @@ import "./LoginView.css";
 const LoginView = () => {
   const [welcomeTitle, setWelcomeTitle] = useState("Welcome Back");
   const [welcomeSubtitle, setWelcomeSubtitle] = useState(
-    "Sign in to continue to Better Zeus",
+    "Connectez-vous pour utiliser Better Zeus",
   );
   const [officeButton, setOfficeButton] = useState(null);
 
@@ -108,7 +108,7 @@ const LoginView = () => {
               <path d="M0 12H11V23H0V12Z" fill="#00A4EF" />
               <path d="M12 12H23V23H12V12Z" fill="#FFB900" />
             </svg>
-            Sign in with Office 365
+            Se connecter avec Microsoft
           </button>
 
           <div className="login-footer">
