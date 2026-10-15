@@ -64,6 +64,18 @@ const CalendarContainer = () => {
       : "light";
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+    () => localStorage.getItem("better-zeus-sidebar-collapsed") === "true",
+  );
+
+  const handleToggleSidebar = () => {
+    // Sous 980px la sidebar est un tiroir ; au-dessus on la replie
+    if (window.matchMedia("(max-width: 980px)").matches) {
+      setIsSidebarOpen((prev) => !prev);
+    } else {
+      setIsSidebarCollapsed((prev) => !prev);
+    }
+  };
 
   const getHighestHierarchyGroup = () => {
     const groups = getUserGroups();
@@ -105,6 +117,13 @@ const CalendarContainer = () => {
   useEffect(() => {
     localStorage.setItem("better-zeus-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "better-zeus-sidebar-collapsed",
+      String(isSidebarCollapsed),
+    );
+  }, [isSidebarCollapsed]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
@@ -364,7 +383,7 @@ const CalendarContainer = () => {
 
   return (
     <div
-      className={`calendar-container ${isSidebarOpen ? "sidebar-open" : ""}`}
+      className={`calendar-container ${isSidebarOpen ? "sidebar-open" : ""} ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}
       data-theme={theme}
     >
       <div
@@ -400,7 +419,7 @@ const CalendarContainer = () => {
             theme={theme}
             eventSearchQuery={eventSearchQuery}
             onEventSearchQueryChange={setEventSearchQuery}
-            onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+            onToggleSidebar={handleToggleSidebar}
             onOpenCalendarExport={() => setIsCalendarExportOpen(true)}
             onCreateEvent={handleCreateCustomEvent}
             onDeleteEvent={handleDeleteCustomEvent}
@@ -421,7 +440,7 @@ const CalendarContainer = () => {
             theme={theme}
             eventSearchQuery={eventSearchQuery}
             onEventSearchQueryChange={setEventSearchQuery}
-            onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+            onToggleSidebar={handleToggleSidebar}
             onOpenCalendarExport={() => setIsCalendarExportOpen(true)}
             onCreateEvent={handleCreateCustomEvent}
             onDeleteEvent={handleDeleteCustomEvent}
@@ -442,7 +461,7 @@ const CalendarContainer = () => {
             theme={theme}
             eventSearchQuery={eventSearchQuery}
             onEventSearchQueryChange={setEventSearchQuery}
-            onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+            onToggleSidebar={handleToggleSidebar}
             onOpenCalendarExport={() => setIsCalendarExportOpen(true)}
             onCreateEvent={handleCreateCustomEvent}
             onDeleteEvent={handleDeleteCustomEvent}
