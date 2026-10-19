@@ -5,7 +5,10 @@
   border-right: 1px solid #eaecf0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d5dd transparent;
 }
 
 .selector-mode-tabs {
@@ -177,25 +180,24 @@
 
 .group-content {
   flex: 1;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
-.group-content::-webkit-scrollbar {
+.group-selector::-webkit-scrollbar {
   width: 8px;
 }
 
-.group-content::-webkit-scrollbar-track {
+.group-selector::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.group-content::-webkit-scrollbar-thumb {
+.group-selector::-webkit-scrollbar-thumb {
   background: #d0d5dd;
   border-radius: 4px;
 }
 
-.group-content::-webkit-scrollbar-thumb:hover {
+.group-selector::-webkit-scrollbar-thumb:hover {
   background: #98a2b3;
 }
 
@@ -633,18 +635,25 @@
 }
 
 /* Dark mode scrollbar */
-[data-theme="dark"] .group-content,
+[data-theme="dark"] .group-selector,
 [data-theme="dark"] .group-list {
+  scrollbar-width: thin;
   scrollbar-color: #374151 #0f172a;
 }
 
-[data-theme="dark"] .group-content::-webkit-scrollbar-thumb,
-[data-theme="dark"] .group-list::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-color: #0f172a;
+[data-theme="dark"] .group-selector::-webkit-scrollbar-track,
+[data-theme="dark"] .group-list::-webkit-scrollbar-track {
+  background: #0f172a;
 }
 
-[data-theme="dark"] .group-content::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] .group-selector::-webkit-scrollbar-thumb,
+[data-theme="dark"] .group-list::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+  border: 2px solid #0f172a;
+}
+
+[data-theme="dark"] .group-selector::-webkit-scrollbar-thumb:hover,
 [data-theme="dark"] .group-list::-webkit-scrollbar-thumb:hover {
   background: #4b5563;
 }
