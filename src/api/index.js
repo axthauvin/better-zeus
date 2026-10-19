@@ -82,7 +82,6 @@ export async function fetchTimeTable(
     if (!authToken) {
       throw new Error("No auth token available");
     }
-    console.log("Fetching timetable with auth token:", authToken);
 
     // Make parallel requests for each group
     const requests = groupsId.map((groupId) => {
@@ -91,8 +90,6 @@ export async function fetchTimeTable(
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
       });
-
-      console.log(`${API_BASE_URL}?${params.toString()}`);
 
       return fetch(`${API_BASE_URL}?${params.toString()}`, {
         headers: {
@@ -198,8 +195,6 @@ export async function fetchReservationDetails(reservationId) {
 export async function fetchCalendarExportToken() {
   const login = getZeusLoginFromAuth();
 
-  console.log("Fetching calendar export token for login:", login);
-
   const authToken = getAuth();
   if (!authToken) {
     throw new Error("No auth token available");
@@ -215,8 +210,6 @@ export async function fetchCalendarExportToken() {
     },
     body: `"${login}"`,
   });
-
-  console.log("Calendar export token response:", response);
 
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`);
@@ -253,29 +246,41 @@ function getColorForEventType(type) {
 export function transformApiDataToEvents(apiData) {
   if (!apiData || !Array.isArray(apiData)) return [];
 
-  return apiData.map((item, index) => ({
-    id: item.idReservation || item.id || index,
-    title: item.name || item.title || "Sans titre",
-    start: new Date(item.startDate || item.start),
-    end: new Date(item.endDate || item.end),
-    color: getColorForEventType(item.typeName),
-    description: item.description || "",
-    location: item.rooms ? item.rooms.map((r) => r.name).join(", ") : "",
-    teacher:
+  return apiData.map((item, index) => {
+    const teachersList =
       item.teachers && item.teachers.length > 0
         ? item.teachers
             .map((t) =>
-              t.firstname && t.name
-                ? `${t.firstname} ${t.name}`
-                : t.name || t.firstname || "",
+              typeof t === "string"
+                ? t
+                : t.firstname && t.name
+                  ? `${t.firstname} ${t.name}`
+                  : t.name || t.firstname || "",
             )
-            .join(", ")
-        : "",
-    type: item.typeName || "",
-    groups: item.groups ? item.groups.map((g) => g.name) : [],
-    rooms: item.rooms || [],
-    isOnline: item.isOnline || false,
-  }));
+            .map((name) => name.trim())
+            .filter(Boolean)
+        : item.teacher
+          ? (Array.isArray(item.teacher) ? item.teacher : item.teacher.split(","))
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : [];
+
+    return {
+      id: item.idReservation || item.id || index,
+      title: item.name || item.title || "Sans titre",
+      start: new Date(item.startDate || item.start),
+      end: new Date(item.endDate || item.end),
+      color: getColorForEventType(item.typeName),
+      description: item.description || "",
+      location: item.rooms ? item.rooms.map((r) => r.name).join(", ") : "",
+      teacher: teachersList.join(", "),
+      teachers: teachersList,
+      type: item.typeName || "",
+      groups: item.groups ? item.groups.map((g) => g.name) : [],
+      rooms: item.rooms || [],
+      isOnline: item.isOnline || false,
+    };
+  });
 }
 
 // Generate random color for events
@@ -323,8 +328,6 @@ export function getUserGroups() {
     }
 
     groups.values.forEach(traverse);
-
-    console.log("All groups extracted:", allGroups);
 
     return allGroups;
   } catch (error) {

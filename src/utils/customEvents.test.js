@@ -87,4 +87,20 @@ describe("customEvents utility", () => {
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe(event2.id);
   });
+
+  test("saveCustomEvent and getCustomEvents support teacher and teachers array", () => {
+    const saved = saveCustomEvent({
+      title: "TD Maths",
+      start: new Date("2026-09-20T09:00:00.000Z"),
+      end: new Date("2026-09-20T10:00:00.000Z"),
+      teacher: "Professeur Tournesol",
+    });
+
+    expect(saved.teacher).toBe("Professeur Tournesol");
+    expect(saved.teachers).toEqual(["Professeur Tournesol"]);
+
+    const stored = getCustomEvents();
+    expect(stored[0].teacher).toBe("Professeur Tournesol");
+    expect(stored[0].teachers).toEqual(["Professeur Tournesol"]);
+  });
 });

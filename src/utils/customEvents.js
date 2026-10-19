@@ -19,6 +19,8 @@ export function getCustomEvents() {
       ...item,
       start: new Date(item.start),
       end: new Date(item.end),
+      teachers:
+        item.teachers || (item.teacher ? [item.teacher.trim()] : []),
       isCustom: true,
     }));
   } catch (error) {
@@ -65,6 +67,7 @@ export function saveCustomEvent(eventData) {
     color: eventData.color || DEFAULT_CUSTOM_EVENT_COLOR,
     location: (eventData.location || "").trim(),
     teacher: (eventData.teacher || "").trim(),
+    teachers: eventData.teacher ? [eventData.teacher.trim()] : [],
     type: (eventData.type || "Personnalisé").trim(),
     description: (eventData.description || "").trim(),
     isOnline: !!eventData.isOnline,
