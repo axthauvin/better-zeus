@@ -15,6 +15,7 @@ import { MyDayPicker } from "../components/DayPicker";
 import EventModal from "../components/EventModal";
 import CreateEventModal from "../components/CreateEventModal";
 import AppMenu from "../components/AppMenu";
+import PresenceSheet from "../components/PresenceSheet";
 import "../components/WeekCalendar.css";
 import "./BaseCalendarLayout.css";
 
@@ -71,6 +72,7 @@ const BaseCalendarLayout = ({
 }) => {
   const [internalCreateModalOpen, setInternalCreateModalOpen] =
     React.useState(false);
+  const [isPresenceOpen, setIsPresenceOpen] = React.useState(false);
   const searchInputRef = React.useRef(null);
 
   const openCreateModal = () => {
@@ -90,6 +92,7 @@ const BaseCalendarLayout = ({
     onViewChange,
     openCreateModal,
     onToggleTheme,
+    openPresence: () => setIsPresenceOpen(true),
   };
 
   React.useEffect(() => {
@@ -110,6 +113,7 @@ const BaseCalendarLayout = ({
       else if (key === "m") handlers.onViewChange?.("month");
       else if (key === "n") handlers.openCreateModal?.();
       else if (key === "d") handlers.onToggleTheme?.();
+      else if (key === "p") handlers.openPresence?.();
       else if (e.key === "/") searchInputRef.current?.focus();
       else return;
 
@@ -288,11 +292,16 @@ const BaseCalendarLayout = ({
           <AppMenu
             exportEvents={exportEvents}
             onOpenCalendarExport={onOpenCalendarExport}
+            onOpenPresence={() => setIsPresenceOpen(true)}
           />
         </div>
       </header>
 
       {children}
+
+      {isPresenceOpen && (
+        <PresenceSheet onClose={() => setIsPresenceOpen(false)} />
+      )}
 
       {selectedEvent && !selectedEvent.isCustom && (
         <EventModal

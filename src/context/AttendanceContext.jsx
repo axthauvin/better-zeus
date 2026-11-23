@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { fetchEventsInChunks, transformApiDataToEvents } from "../api";
-import { differenceInMinutes } from "date-fns";
+import { computePresenceStats } from "../utils/attendanceStats";
 
 const AttendanceContext = createContext(null);
 
@@ -318,32 +318,12 @@ export const AttendanceProvider = ({ children }) => {
       );
       const events = transformApiDataToEvents(rawEvents);
 
-      const eligibleEvents = events.filter((ev) => !isNonCountableEvent(ev));
-
-      let totalMinutes = 0;
-      let absentMinutes = 0;
-
-      eligibleEvents.forEach((event) => {
-        const duration = differenceInMinutes(event.end, event.start);
-        totalMinutes += duration;
-
-        if (missedEvents.includes(event.id)) {
-          absentMinutes += duration;
-        }
+      const newStats = computePresenceStats(events, {
+        isMissed: (event) => missedEvents.includes(event.id),
+        isExcluded: (event) => isNonCountableEvent(event),
+        rangeStart: start,
+        rangeEnd: end,
       });
-
-      const totalHours = totalMinutes / 60;
-      const absentHours = absentMinutes / 60;
-      const attendedHours = totalHours - absentHours;
-      const percentage =
-        totalHours > 0 ? (attendedHours / totalHours) * 100 : 100;
-
-      const newStats = {
-        totalHours: Math.round(totalHours * 100) / 100,
-        absentHours: Math.round(absentHours * 100) / 100,
-        attendedHours: Math.round(attendedHours * 100) / 100,
-        percentage: Math.round(percentage * 10) / 10,
-      };
 
       setPresenceStats(newStats);
       setLastPresenceRefresh(new Date().toISOString());

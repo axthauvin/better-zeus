@@ -1,0 +1,578 @@
+/* Attendance dashboard */
+
+.presence-sheet {
+  max-width: 600px;
+  max-height: min(90vh, 860px);
+}
+
+.presence-sheet-subtitle {
+  margin: 4px 0 0;
+  color: var(--bz-label-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ---------- Overview: ring + tiles ---------- */
+
+.presence-overview {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 4px 2px 0;
+}
+
+.presence-ring {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  flex: 0 0 auto;
+}
+
+.presence-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.presence-ring circle {
+  fill: none;
+  stroke-width: 8;
+}
+
+.presence-ring-track {
+  stroke: var(--bz-fill);
+}
+
+.presence-ring-value {
+  stroke: var(--bz-green);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s var(--bz-ease-out);
+}
+
+.presence-ring.failing .presence-ring-value {
+  stroke: var(--bz-orange);
+}
+
+.presence-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--bz-font-display);
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.presence-ring-label small {
+  margin-left: 1px;
+  color: var(--bz-label-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.presence-tiles {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.presence-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: var(--bz-radius-lg);
+  background: var(--bz-bg-grouped);
+}
+
+.presence-tile-label {
+  color: var(--bz-label-secondary);
+  font-size: 12px;
+}
+
+.presence-tile-value {
+  color: var(--bz-label);
+  font-family: var(--bz-font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.presence-tile-text {
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presence-tile-detail {
+  overflow: hidden;
+  color: var(--bz-label-tertiary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Threshold status line (icon + label, never colour alone) */
+.presence-threshold {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 2px 0;
+  color: var(--bz-label-secondary);
+  font-size: 12px;
+}
+
+.presence-threshold-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--bz-green);
+}
+
+.presence-threshold.below .presence-threshold-dot {
+  background: var(--bz-orange);
+}
+
+/* ---------- Sections ---------- */
+
+.presence-section {
+  margin-top: 24px;
+}
+
+.presence-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 26px;
+  margin-bottom: 10px;
+}
+
+.presence-section-header h3 {
+  margin: 0;
+  color: var(--bz-label);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Weekly column chart ---------- */
+
+.presence-chart {
+  margin: 0;
+}
+
+.presence-chart-body {
+  display: flex;
+  gap: 8px;
+  height: 128px;
+}
+
+.presence-chart-yaxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 28px;
+  flex: 0 0 auto;
+  margin: -6px 0;
+  color: var(--bz-label-tertiary);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.presence-chart-plot {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.presence-chart-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--bz-grid-line);
+}
+
+.presence-chart-grid:first-child {
+  background: var(--bz-separator-strong);
+}
+
+.presence-chart-columns {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+}
+
+.presence-chart-slot {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: default;
+}
+
+.presence-chart-slot:hover,
+.presence-chart-slot.hovered {
+  background: var(--bz-fill-hover);
+}
+
+.presence-chart-slot:focus-visible {
+  box-shadow: var(--bz-focus-ring);
+}
+
+.presence-chart-bar {
+  width: min(70%, 22px);
+  min-height: 3px;
+  border-radius: 4px 4px 0 0;
+  background: var(--bz-red);
+}
+
+.presence-chart-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 128px;
+  padding: 8px 10px;
+  border-radius: var(--bz-radius);
+  background: var(--bz-material);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--bz-shadow-popover);
+  color: var(--bz-label);
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.presence-chart-tooltip strong {
+  font-weight: 600;
+}
+
+.presence-chart-tooltip .muted {
+  color: var(--bz-label-tertiary);
+}
+
+.presence-chart-xaxis {
+  display: flex;
+  margin: 6px 0 0 36px;
+  color: var(--bz-label-tertiary);
+  font-size: 10px;
+}
+
+.presence-chart-xaxis span {
+  flex: 1;
+  min-width: 0;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.presence-chart-empty {
+  margin: 8px 0 0 36px;
+  color: var(--bz-label-tertiary);
+  font-size: 12px;
+}
+
+/* ---------- Per-course meters ---------- */
+
+.presence-sort {
+  flex: 0 0 auto;
+}
+
+.presence-sort .bz-segmented-item {
+  height: 24px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.presence-course-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.presence-course {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.presence-course-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.presence-course-title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--bz-label);
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presence-course-rate {
+  flex: 0 0 auto;
+  color: var(--bz-label);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.presence-course.clean .presence-course-title,
+.presence-course.clean .presence-course-rate {
+  color: var(--bz-label-secondary);
+  font-weight: 400;
+}
+
+.presence-course-meter {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bz-fill-secondary);
+  overflow: hidden;
+}
+
+.presence-course-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--bz-red);
+  transition: width 0.4s var(--bz-ease-out);
+}
+
+.presence-course-meta {
+  color: var(--bz-label-tertiary);
+  font-size: 11px;
+}
+
+/* ---------- Empty state ---------- */
+
+.presence-empty {
+  padding: 14px 16px;
+  border-radius: var(--bz-radius-lg);
+  background: var(--bz-bg-grouped);
+  color: var(--bz-label-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ---------- Settings ---------- */
+
+.presence-field {
+  justify-content: space-between;
+  min-height: 46px;
+  padding: 7px 10px 7px 14px;
+}
+
+.presence-field-label {
+  color: var(--bz-label);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.presence-search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 240px;
+  height: 30px;
+  padding: 0 8px 0 10px;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  background: var(--bz-fill);
+  color: var(--bz-label);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.presence-search-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presence-search-trigger .placeholder {
+  color: var(--bz-label-secondary);
+}
+
+.presence-search-trigger:hover,
+.presence-search-trigger.active {
+  background: var(--bz-fill-active);
+}
+
+.presence-search-trigger .chevron-icon {
+  flex: 0 0 auto;
+  color: var(--bz-label-secondary);
+  transition: transform 0.2s var(--bz-ease);
+}
+
+.presence-search-trigger.active .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.presence-date-input,
+.presence-threshold-input input {
+  height: 30px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  background: var(--bz-fill);
+  color: var(--bz-label);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.presence-threshold-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bz-label-secondary);
+  font-size: 14px;
+}
+
+.presence-threshold-input input {
+  width: 64px;
+  text-align: right;
+}
+
+.presence-date-input:focus,
+.presence-threshold-input input:focus {
+  box-shadow: var(--bz-focus-ring);
+}
+
+.presence-groups-dropdown {
+  padding: 4px 8px 8px;
+  border-top: 1px solid var(--bz-separator);
+  border-bottom: 1px solid var(--bz-separator);
+}
+
+.presence-search {
+  height: 30px;
+  margin: 6px 0;
+}
+
+.presence-groups-list {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.presence-group-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: var(--bz-radius-xs);
+  background: transparent;
+  color: var(--bz-label);
+  text-align: left;
+  cursor: pointer;
+}
+
+.presence-group-item:hover {
+  background: var(--bz-fill-hover);
+}
+
+.presence-group-item.selected {
+  color: var(--bz-accent);
+}
+
+.group-item-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.group-item-name {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group-item-path {
+  overflow: hidden;
+  color: var(--bz-label-tertiary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presence-no-results {
+  padding: 12px 8px;
+  color: var(--bz-label-tertiary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.presence-footnote {
+  margin: 10px 14px 0;
+  color: var(--bz-label-tertiary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* ---------- Footer ---------- */
+
+.presence-footer {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.refresh-time {
+  min-width: 0;
+  color: var(--bz-label-tertiary);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.spinning {
+  animation: bz-spin 0.9s linear infinite;
+}
+
+@media (max-width: 640px) {
+  .presence-overview {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .presence-ring {
+    align-self: center;
+  }
+
+  .presence-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .presence-tiles .presence-tile:last-child {
+    grid-column: span 2;
+  }
+}

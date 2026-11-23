@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   Ellipsis,
+  ChartPie,
   CalendarPlus,
   Download,
   FileDown,
@@ -16,11 +17,12 @@ import "./AppMenu.css";
 
 /**
  * AppMenu — the toolbar "…" menu.
- * Groups calendar export, data management, appearance and account actions.
+ * Groups attendance, calendar export, data management and account actions.
  */
 const AppMenu = ({
   exportEvents = [],
   onOpenCalendarExport = () => {},
+  onOpenPresence = () => {},
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
@@ -151,6 +153,18 @@ const AppMenu = ({
 
       {isOpen && (
         <div className="bz-popover bz-menu app-menu-popover" role="menu">
+          <button
+            type="button"
+            role="menuitem"
+            className="bz-menu-item"
+            onClick={run(onOpenPresence)}
+          >
+            <ChartPie size={16} strokeWidth={1.75} />
+            <span className="bz-menu-label">Suivi de présence…</span>
+            <span className="bz-menu-shortcut">P</span>
+          </button>
+
+          <div className="bz-menu-separator" />
           <div className="bz-menu-heading">Calendrier</div>
           <button
             type="button"
@@ -231,6 +245,7 @@ const AppMenu = ({
             <span><kbd>J</kbd><kbd>S</kbd><kbd>M</kbd> Vues</span>
             <span><kbd>N</kbd> Événement</span>
             <span><kbd>D</kbd> Apparence</span>
+            <span><kbd>P</kbd> Présence</span>
             <span><kbd>/</kbd> Rechercher</span>
           </div>
         </div>
