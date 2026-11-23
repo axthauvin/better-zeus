@@ -31,7 +31,9 @@ Check the release page and follow the instructions :
 - **Groups, rooms or teachers**: pick what you want to see from the sidebar, your selection is remembered.
 - **Personal events**: add your own events to the calendar and edit them with a simple click.
 - **Calendar subscription (iCal)**: subscribe to your groups in Apple Calendar, Google Calendar or Outlook, or download the current view as `.ics`.
-- **Keyboard shortcuts**: `←` `→` to navigate, `T` for today, `J` `S` `M` to switch view, `N` for a new event, `/` to search.
+- **Keyboard shortcuts**: `←` `→` to navigate, `T` for today, `1` `2` `3` to switch view, `N` for a new event, `P` for attendance, `J` for games, `/` to search.
+- **Attendance dashboard**: attendance rate, absences per week and per course, most-missed course.
+- **Games**: press `J` and your week becomes the playground — *Pile de cours* (stack your courses, free a slot Monday→Friday) and *Survie au lundi* (be the current time line and jump over your real courses).
 - **Responsive** layout that works on small screens too.
 
 ---

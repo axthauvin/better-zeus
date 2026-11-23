@@ -16,13 +16,14 @@ import EventModal from "../components/EventModal";
 import CreateEventModal from "../components/CreateEventModal";
 import AppMenu from "../components/AppMenu";
 import PresenceSheet from "../components/PresenceSheet";
+import GameMode from "../games/GameMode";
 import "../components/WeekCalendar.css";
 import "./BaseCalendarLayout.css";
 
 const VIEWS = [
-  { id: "day", label: "Jour", shortcut: "J" },
-  { id: "week", label: "Semaine", shortcut: "S" },
-  { id: "month", label: "Mois", shortcut: "M" },
+  { id: "day", label: "Jour", shortcut: "1" },
+  { id: "week", label: "Semaine", shortcut: "2" },
+  { id: "month", label: "Mois", shortcut: "3" },
 ];
 
 const PERIOD_LABELS = {
@@ -73,6 +74,7 @@ const BaseCalendarLayout = ({
   const [internalCreateModalOpen, setInternalCreateModalOpen] =
     React.useState(false);
   const [isPresenceOpen, setIsPresenceOpen] = React.useState(false);
+  const [isGameMode, setIsGameMode] = React.useState(false);
   const searchInputRef = React.useRef(null);
 
   const openCreateModal = () => {
@@ -93,11 +95,15 @@ const BaseCalendarLayout = ({
     openCreateModal,
     onToggleTheme,
     openPresence: () => setIsPresenceOpen(true),
+    openGames: () => setIsGameMode(true),
+    gameMode: isGameMode,
   };
 
   React.useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      // Game mode owns the keyboard
+      if (handlersRef.current.gameMode) return;
       if (isTypingTarget(document.activeElement)) return;
       // Ignore shortcuts while a sheet or popover is open
       if (document.querySelector(".bz-overlay, .bz-popover")) return;
@@ -108,9 +114,10 @@ const BaseCalendarLayout = ({
       if (e.key === "ArrowLeft") handlers.onPrevious?.();
       else if (e.key === "ArrowRight") handlers.onNext?.();
       else if (key === "t") handlers.onToday?.();
-      else if (key === "j") handlers.onViewChange?.("day");
-      else if (key === "s") handlers.onViewChange?.("week");
-      else if (key === "m") handlers.onViewChange?.("month");
+      else if (e.key === "1") handlers.onViewChange?.("day");
+      else if (e.key === "2") handlers.onViewChange?.("week");
+      else if (e.key === "3") handlers.onViewChange?.("month");
+      else if (key === "j") handlers.openGames?.();
       else if (key === "n") handlers.openCreateModal?.();
       else if (key === "d") handlers.onToggleTheme?.();
       else if (key === "p") handlers.openPresence?.();
@@ -125,6 +132,19 @@ const BaseCalendarLayout = ({
   }, []);
 
   const periodLabels = PERIOD_LABELS[view] || PERIOD_LABELS.week;
+
+  // Game mode: the calendar window itself becomes the game
+  if (isGameMode) {
+    return (
+      <GameMode
+        onExit={() => setIsGameMode(false)}
+        events={exportEvents}
+        theme={theme}
+        onToggleTheme={onToggleTheme}
+        currentDate={currentDate}
+      />
+    );
+  }
 
   return (
     <div className={`calendar-view ${className}`}>
@@ -293,6 +313,7 @@ const BaseCalendarLayout = ({
             exportEvents={exportEvents}
             onOpenCalendarExport={onOpenCalendarExport}
             onOpenPresence={() => setIsPresenceOpen(true)}
+            onOpenGames={() => setIsGameMode(true)}
           />
         </div>
       </header>

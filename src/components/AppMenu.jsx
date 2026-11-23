@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Ellipsis,
   ChartPie,
+  Gamepad2,
   CalendarPlus,
   Download,
   FileDown,
@@ -23,6 +24,7 @@ const AppMenu = ({
   exportEvents = [],
   onOpenCalendarExport = () => {},
   onOpenPresence = () => {},
+  onOpenGames = () => {},
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
@@ -163,6 +165,16 @@ const AppMenu = ({
             <span className="bz-menu-label">Suivi de présence…</span>
             <span className="bz-menu-shortcut">P</span>
           </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="bz-menu-item"
+            onClick={run(onOpenGames)}
+          >
+            <Gamepad2 size={16} strokeWidth={1.75} />
+            <span className="bz-menu-label">Jeux…</span>
+            <span className="bz-menu-shortcut">J</span>
+          </button>
 
           <div className="bz-menu-separator" />
           <div className="bz-menu-heading">Calendrier</div>
@@ -242,10 +254,11 @@ const AppMenu = ({
           <div className="app-menu-shortcuts">
             <span><kbd>←</kbd><kbd>→</kbd> Naviguer</span>
             <span><kbd>T</kbd> Aujourd'hui</span>
-            <span><kbd>J</kbd><kbd>S</kbd><kbd>M</kbd> Vues</span>
+            <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Vues</span>
             <span><kbd>N</kbd> Événement</span>
             <span><kbd>D</kbd> Apparence</span>
             <span><kbd>P</kbd> Présence</span>
+            <span><kbd>J</kbd> Jeux</span>
             <span><kbd>/</kbd> Rechercher</span>
           </div>
         </div>
