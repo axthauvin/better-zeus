@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { getUserGroups, logout } from "../api";
+import { getUserGroups } from "../api";
 import "./GroupSelector.css";
-import { Search, Trash, Plus, Check, LogOut } from "lucide-react";
+import { Search, Plus, Check, X } from "lucide-react";
+import BrandMark from "./BrandMark";
+
+const MODES = [
+  { id: "groups", label: "Groupes" },
+  { id: "rooms", label: "Salles" },
+  { id: "teachers", label: "Enseignants" },
+];
+
+const SEARCH_PLACEHOLDERS = {
+  groups: "Rechercher un groupe",
+  rooms: "Rechercher une salle",
+  teachers: "Rechercher un enseignant",
+};
 
 const GroupSelector = ({
   selectionMode,
@@ -52,7 +65,7 @@ const GroupSelector = ({
         const formattedGroups = groups.map((group) => ({
           id: group.id || group.value?.id,
           name: group.name || group.value?.name || "Groupe sans nom",
-          path: group.path || "",
+          path: group.path ? String(group.path) : "",
         }));
         setAllGroups(formattedGroups);
       } catch (error) {
@@ -131,316 +144,252 @@ const GroupSelector = ({
 
   const highestHierarchyGroup = getHighestHierarchyGroup();
 
+  const header = (
+    <div className="sidebar-header">
+      <div className="sidebar-brand">
+        <BrandMark className="sidebar-brand-mark" />
+        <span className="sidebar-brand-name">Better Zeus</span>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="group-selector">
-        <div className="group-selector-header">
-          <h3>Zeus</h3>
-        </div>
-        <div className="group-selector-loading">
-          <p>Chargement des groupes...</p>
+        {header}
+        <div className="sidebar-empty">
+          <span className="bz-spinner" />
         </div>
       </div>
     );
   }
 
+  // Selected items (top section) for the current mode
+  const selectedSection =
+    selectionMode === "groups"
+      ? {
+          title: "Mes groupes",
+          items: selectedGroupsData.map((group) => ({
+            key: group.id,
+            label: group.name,
+            enabled: enabledGroups.includes(group.id),
+            onToggle: () => onToggleGroupEnabled(group.id),
+            onRemove: () => handleGroupToggle(group.id),
+          })),
+          onClear: () => onGroupsChange([]),
+        }
+      : selectionMode === "rooms"
+        ? {
+            title: "Salle affichée",
+            items: selectedRoomsData.map((room) => ({
+              key: room,
+              label: room,
+              enabled: true,
+              onRemove: () => handleRoomToggle(room),
+            })),
+            onClear: () => onRoomsChange([]),
+          }
+        : {
+            title: "Enseignant affiché",
+            items: selectedTeachersData.map((teacher) => ({
+              key: teacher,
+              label: teacher,
+              enabled: true,
+              onRemove: () => handleTeacherToggle(teacher),
+            })),
+            onClear: () => onTeachersChange([]),
+          };
+
+  // Available items (bottom section) for the current mode
+  const availableSection =
+    selectionMode === "groups"
+      ? {
+          title: "Tous les groupes",
+          items: unselectedFilteredGroups.map((group) => ({
+            key: group.id,
+            label: group.name,
+            detail: group.path,
+            onAdd: () => handleGroupToggle(group.id),
+          })),
+          empty:
+            searchQuery === "" && selectedGroups.length === allGroups.length
+              ? "Tous les groupes sont sélectionnés"
+              : "Aucun groupe trouvé",
+        }
+      : selectionMode === "rooms"
+        ? {
+            title: "Salles",
+            items: unselectedFilteredRooms.map((room) => ({
+              key: room,
+              label: room,
+              onAdd: () => handleRoomToggle(room),
+            })),
+            empty:
+              availableRooms.length === 0
+                ? "Aucune salle sur cette période"
+                : "Aucune salle trouvée",
+          }
+        : {
+            title: "Enseignants",
+            items: unselectedFilteredTeachers.map((teacher) => ({
+              key: teacher,
+              label: teacher,
+              onAdd: () => handleTeacherToggle(teacher),
+            })),
+            empty:
+              availableTeachers.length === 0
+                ? "Aucun enseignant sur cette période"
+                : "Aucun enseignant trouvé",
+          };
+
+  const addLabel = selectionMode === "groups" ? "Ajouter" : "Afficher";
+
   return (
     <div className="group-selector">
-      <div className="group-selector-header">
-        <div className="header-icon">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="70%"
-            height="70%"
-            viewBox="0 0 24 24"
-            fill="none"
-          >
-            <path
-              d="M9.31994 13.2814H12.4099V20.4814C12.4099 21.5414 13.7299 22.0414 14.4299 21.2414L21.9999 12.6414C22.6599 11.8914 22.1299 10.7214 21.1299 10.7214H18.0399V3.52143C18.0399 2.46143 16.7199 1.96143 16.0199 2.76143L8.44994 11.3614C7.79994 12.1114 8.32994 13.2814 9.31994 13.2814Z"
-              fill="currentColor"
-            />
-            <path
-              d="M8.5 4.75H1.5C1.09 4.75 0.75 4.41 0.75 4C0.75 3.59 1.09 3.25 1.5 3.25H8.5C8.91 3.25 9.25 3.59 9.25 4C9.25 4.41 8.91 4.75 8.5 4.75Z"
-              fill="currentColor"
-            />
-            <path
-              d="M7.5 20.75H1.5C1.09 20.75 0.75 20.41 0.75 20C0.75 19.59 1.09 19.25 1.5 19.25H7.5C7.91 19.25 8.25 19.59 8.25 20C8.25 20.41 7.91 20.75 7.5 20.75Z"
-              fill="currentColor"
-            />
-            <path
-              d="M4.5 12.75H1.5C1.09 12.75 0.75 12.41 0.75 12C0.75 11.59 1.09 11.25 1.5 11.25H4.5C4.91 11.25 5.25 11.59 5.25 12C5.25 12.41 4.91 12.75 4.5 12.75Z"
-              fill="currentColor"
-            />
-          </svg>
-        </div>
-        <div className="header-content">
-          <h3>
-            <i>Better </i>
-            {""}Zeus
-          </h3>
-          <button className="logout" onClick={logout} type="button">
-            <LogOut size={16} color="#667085" />
-          </button>
-        </div>
-      </div>
+      {header}
 
-      <div className="selector-mode-tabs">
-        <button
-          className={`mode-tab ${selectionMode === "groups" ? "active" : ""}`}
-          onClick={() => handleSelectionMode("groups")}
-        >
-          Groupes
-        </button>
-        <button
-          className={`mode-tab ${selectionMode === "rooms" ? "active" : ""}`}
-          onClick={() => handleSelectionMode("rooms")}
-        >
-          Salles
-        </button>
-        <button
-          className={`mode-tab ${selectionMode === "teachers" ? "active" : ""}`}
-          onClick={() => handleSelectionMode("teachers")}
-        >
-          Enseignants
-        </button>
-      </div>
+      <div className="sidebar-controls">
+        <div className="bz-segmented sidebar-modes" role="tablist">
+          {MODES.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={selectionMode === id}
+              className={`bz-segmented-item ${selectionMode === id ? "active" : ""}`}
+              onClick={() => handleSelectionMode(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
-      <div className="group-search">
-        <div className="search-wrapper">
-          <Search className="search-icon" size={16} strokeWidth={2} />
+        <label className="bz-search sidebar-search">
+          <Search size={14} strokeWidth={2} />
           <input
             type="text"
-            placeholder={
-              selectionMode === "groups"
-                ? "Rechercher un groupe..."
-                : selectionMode === "teachers"
-                ? "Rechercher un enseignant..."
-                : "Rechercher une salle..."
-            }
+            placeholder={SEARCH_PLACEHOLDERS[selectionMode]}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="group-search-input"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setSearchQuery("");
+            }}
           />
-        </div>
-        {selectionMode === "rooms" && highestHierarchyGroup && (
-          <p className="room-scope-hint">
-            Mode salle: scope auto sur le groupe racine "
-            {highestHierarchyGroup.name}".
-          </p>
-        )}
-        {selectionMode === "teachers" && highestHierarchyGroup && (
-          <p className="room-scope-hint">
-            Mode enseignant: scope auto sur le groupe racine "
-            {highestHierarchyGroup.name}".
-          </p>
-        )}
+          {searchQuery && (
+            <button
+              type="button"
+              className="bz-search-clear"
+              onClick={() => setSearchQuery("")}
+              aria-label="Effacer la recherche"
+            >
+              <X size={10} strokeWidth={3} />
+            </button>
+          )}
+        </label>
       </div>
 
-      <div className="group-content">
-        {selectionMode === "groups" && selectedGroupsData.length > 0 && (
-          <div className="selected-section">
-            <div className="section-header">
-              <span className="section-title">Selectionnes</span>
+      <div className="sidebar-scroll bz-scroll">
+        {selectedSection.items.length > 0 && (
+          <section className="sidebar-section">
+            <div className="sidebar-section-header">
+              <span className="sidebar-section-title">
+                {selectedSection.title}
+              </span>
               <button
-                className="clear-all-btn"
-                onClick={() => onGroupsChange([])}
-                title="Tout deselelectionner"
+                type="button"
+                className="sidebar-section-action"
+                onClick={selectedSection.onClear}
               >
-                Effacer tout
+                Tout retirer
               </button>
             </div>
-            <div className="selected-groups">
-              {selectedGroupsData.map((group) => {
-                const isEnabled = enabledGroups.includes(group.id);
-                return (
-                  <div
-                    key={group.id}
-                    className={`selected-group-item ${isEnabled ? "" : "disabled"}`}
+            <ul className="sidebar-list">
+              {selectedSection.items.map((item) => (
+                <li
+                  key={item.key}
+                  className={`sidebar-row selected ${item.enabled ? "" : "disabled"}`}
+                >
+                  <button
+                    type="button"
+                    className="sidebar-row-main"
+                    onClick={item.onToggle}
+                    disabled={!item.onToggle}
+                    aria-pressed={item.onToggle ? item.enabled : undefined}
+                    title={
+                      item.onToggle
+                        ? item.enabled
+                          ? "Masquer du calendrier"
+                          : "Afficher dans le calendrier"
+                        : undefined
+                    }
                   >
-                    <div
-                      className="group-toggle-checkbox"
-                      onClick={() => onToggleGroupEnabled(group.id)}
-                      title={isEnabled ? "Desactiver" : "Activer"}
-                    >
-                      {isEnabled ? (
-                        <Check color="#7f56d9" size={16} strokeWidth={3} />
-                      ) : (
-                        <div className="empty-check" />
-                      )}
-                    </div>
                     <span
-                      className="group-name"
-                      onClick={() => onToggleGroupEnabled(group.id)}
+                      className={`sidebar-check ${item.enabled ? "checked" : ""}`}
+                      aria-hidden="true"
                     >
-                      {group.name}
+                      {item.enabled && <Check size={11} strokeWidth={3.5} />}
                     </span>
-                    <button
-                      className="remove-btn"
-                      onClick={() => handleGroupToggle(group.id)}
-                      title="Retirer"
-                    >
-                      <Trash size={16} color="#667085" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {selectionMode === "rooms" && selectedRoomsData.length > 0 && (
-          <div className="selected-section">
-            <div className="section-header">
-              <span className="section-title">Salles selectionnees</span>
-              <button
-                className="clear-all-btn"
-                onClick={() => onRoomsChange([])}
-                title="Tout deselelectionner"
-              >
-                Effacer tout
-              </button>
-            </div>
-            <div className="selected-groups">
-              {selectedRoomsData.map((room) => (
-                <div key={room} className="selected-group-item">
-                  <Check color="#7f56d9" size={16} />
-                  <span className="group-name">{room}</span>
+                    <span className="sidebar-row-label">{item.label}</span>
+                  </button>
                   <button
-                    className="remove-btn"
-                    onClick={() => handleRoomToggle(room)}
+                    type="button"
+                    className="sidebar-row-accessory"
+                    onClick={item.onRemove}
+                    aria-label={`Retirer ${item.label}`}
                     title="Retirer"
                   >
-                    <Trash size={16} color="#667085" />
+                    <X size={13} strokeWidth={2.25} />
                   </button>
-                </div>
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </section>
         )}
 
-        {selectionMode === "teachers" && selectedTeachersData.length > 0 && (
-          <div className="selected-section">
-            <div className="section-header">
-              <span className="section-title">Enseignants selectionnes</span>
-              <button
-                className="clear-all-btn"
-                onClick={() => onTeachersChange([])}
-                title="Tout deselelectionner"
-              >
-                Effacer tout
-              </button>
-            </div>
-            <div className="selected-groups">
-              {selectedTeachersData.map((teacher) => (
-                <div key={teacher} className="selected-group-item">
-                  <Check color="#7f56d9" size={16} />
-                  <span className="group-name">{teacher}</span>
-                  <button
-                    className="remove-btn"
-                    onClick={() => handleTeacherToggle(teacher)}
-                    title="Retirer"
-                  >
-                    <Trash size={16} color="#667085" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="all-groups-section">
-          <div className="section-header">
-            <span className="section-title">
-              {selectionMode === "groups"
-                ? "Tous les groupes"
-                : selectionMode === "teachers"
-                ? "Tous les enseignants"
-                : "Toutes les salles"}
+        <section className="sidebar-section">
+          <div className="sidebar-section-header">
+            <span className="sidebar-section-title">
+              {availableSection.title}
             </span>
           </div>
-          <div className="group-list">
-            {selectionMode === "groups" ? (
-              unselectedFilteredGroups.length === 0 &&
-              searchQuery === "" &&
-              selectedGroups.length === allGroups.length ? (
-                <div className="no-groups">
-                  <p>Tous les groupes sont selectionnes</p>
-                </div>
-              ) : unselectedFilteredGroups.length === 0 ? (
-                <div className="no-groups">
-                  <p>Aucun groupe trouve</p>
-                </div>
-              ) : (
-                unselectedFilteredGroups.map((group) => (
-                  <div
-                    key={group.id}
-                    className="group-item"
-                    onClick={() => handleGroupToggle(group.id)}
+          {availableSection.items.length === 0 ? (
+            <p className="sidebar-empty-text">{availableSection.empty}</p>
+          ) : (
+            <ul className="sidebar-list">
+              {availableSection.items.map((item) => (
+                <li key={item.key} className="sidebar-row">
+                  <button
+                    type="button"
+                    className="sidebar-row-main"
+                    onClick={item.onAdd}
+                    title={`${addLabel} ${item.label}`}
                   >
-                    <div className="group-info">
-                      <span className="group-name">{group.name}</span>
-                      {group.path && (
-                        <span className="group-path">{group.path}</span>
+                    <span className="sidebar-row-text">
+                      <span className="sidebar-row-label">{item.label}</span>
+                      {item.detail && (
+                        <span className="sidebar-row-detail">
+                          {String(item.detail).split("/").join(" › ")}
+                        </span>
                       )}
-                    </div>
-                    <button className="add-btn" title="Ajouter">
-                      <Plus size={16} strokeWidth={2} />
-                    </button>
-                  </div>
-                ))
-              )
-            ) : selectionMode === "teachers" ? (
-              unselectedFilteredTeachers.length === 0 ? (
-                <div className="no-groups">
-                  <p>
-                    {availableTeachers.length === 0
-                      ? "Aucun enseignant detecte sur cette plage"
-                      : "Aucun enseignant trouve"}
-                  </p>
-                </div>
-              ) : (
-                unselectedFilteredTeachers.map((teacher) => (
-                  <div
-                    key={teacher}
-                    className="group-item"
-                    onClick={() => handleTeacherToggle(teacher)}
-                  >
-                    <div className="group-info">
-                      <span className="group-name">{teacher}</span>
-                    </div>
-                    <button className="add-btn" title="Ajouter">
-                      <Plus size={16} strokeWidth={2} />
-                    </button>
-                  </div>
-                ))
-              )
-            ) : unselectedFilteredRooms.length === 0 ? (
-              <div className="no-groups">
-                <p>
-                  {availableRooms.length === 0
-                    ? "Aucune salle detectee sur cette plage"
-                    : "Aucune salle trouvee"}
-                </p>
-              </div>
-            ) : (
-              unselectedFilteredRooms.map((room) => (
-                <div
-                  key={room}
-                  className="group-item"
-                  onClick={() => handleRoomToggle(room)}
-                >
-                  <div className="group-info">
-                    <span className="group-name">{room}</span>
-                  </div>
-                  <button className="add-btn" title="Ajouter">
-                    <Plus size={16} strokeWidth={2} />
+                    </span>
+                    <span className="sidebar-row-add" aria-hidden="true">
+                      <Plus size={13} strokeWidth={2.5} />
+                    </span>
                   </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
+
+      {(selectionMode === "rooms" || selectionMode === "teachers") &&
+        highestHierarchyGroup && (
+          <p className="sidebar-footnote">
+            Recherche sur l'ensemble de « {highestHierarchyGroup.name} » pour
+            la période affichée.
+          </p>
+        )}
     </div>
   );
 };

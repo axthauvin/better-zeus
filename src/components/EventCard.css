@@ -1,231 +1,195 @@
+/* Event block — tinted fill, colour bar, quiet typography */
+
 .event-card {
   position: absolute;
-  left: 4px;
-  right: 4px;
-  border-radius: 8px;
-  padding: 4px 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
   overflow: hidden;
+  padding: 4px 6px 4px 7px;
   border-left: 3px solid;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 5px;
   pointer-events: auto;
+  cursor: pointer;
+  font-family: var(--bz-font);
+  transition:
+    box-shadow 0.15s var(--bz-ease),
+    filter 0.15s var(--bz-ease);
+}
+
+/* 1px gap between stacked / adjacent events */
+.event-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0 5px 5px 0;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  pointer-events: none;
 }
 
 .event-card:hover {
-  transform: translateX(-2px) scale(1.02);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 10;
+  z-index: 5;
+  filter: saturate(1.15) brightness(0.97);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.event-card.missed {
-  border-left-style: dashed;
+.bz-theme[data-theme="dark"] .event-card:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
-.event-card.custom-event {
-  border-left-style: dashed;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+/* Column that wraps: lines that don't fully fit move to a hidden second
+   column instead of being cut in half. */
+.event-card-content {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  column-gap: 12px;
+  row-gap: 1px;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.event-card-content > * {
+  width: 100%;
+  flex: 0 0 auto;
 }
 
 .event-card-header-row {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
   gap: 4px;
-}
-
-.custom-badge-icon {
-  margin-right: 4px;
-  vertical-align: middle;
-  display: inline-block;
-  flex-shrink: 0;
-  opacity: 0.95;
-}
-
-.custom-event-pill-tag {
-  font-size: 8px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px 4px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.1);
-  color: inherit;
-  flex-shrink: 0;
-  line-height: 1.2;
-}
-
-[data-theme="dark"] .event-card.custom-event {
-  border-right-color: rgba(255, 255, 255, 0.1);
-  border-top-color: rgba(255, 255, 255, 0.08);
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme="dark"] .custom-event-pill-tag {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.event-card.missed::after {
-  content: "Absent";
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(127, 29, 29, 0.85);
-  background: rgba(254, 226, 226, 0.8);
-  border-radius: 999px;
-  padding: 1px 6px;
-}
-
-[data-theme="dark"] .event-card {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-}
-
-[data-theme="dark"] .event-card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45);
-}
-
-[data-theme="dark"] .event-card.missed::after {
-  color: #fecaca;
-  background: rgba(127, 29, 29, 0.55);
-}
-
-.event-card-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  min-width: 0;
 }
 
 .event-card-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
+  color: inherit;
   font-size: 12px;
   font-weight: 600;
-  color: inherit;
   line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.online-badge-icon {
-  margin-right: 4px;
-  vertical-align: middle;
-  display: inline-block;
-  opacity: 0.9;
+  letter-spacing: -0.01em;
+  word-break: break-word;
 }
 
 .event-card-time {
-  font-size: 11px;
-  color: inherit;
-  opacity: 0.85;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.event-card-location {
-  font-size: 10px;
-  color: inherit;
-  opacity: 0.75;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 500;
-}
-
-.event-card-groups {
-  font-size: 9px;
-  color: inherit;
-  opacity: 0.7;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  font-weight: 500;
-}
-
-.event-card-location-fallback {
-  font-size: 10px;
   color: inherit;
   opacity: 0.8;
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
 }
 
-/* When no title, make time more prominent */
-.event-card.no-title .event-card-time {
-  font-size: 12px;
-  font-weight: 700;
-  opacity: 1;
+.event-card-location,
+.event-card-groups {
+  overflow: hidden;
+  color: inherit;
+  opacity: 0.7;
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Small events (< 40 minutes) - prioritize title */
+.online-badge-icon {
+  display: inline-block;
+  margin-right: 4px;
+  vertical-align: -2px;
+}
+
+/* Short events: single line */
 .event-card.small {
-  padding: 4px 8px;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 .event-card.small .event-card-content {
-  gap: 0;
   justify-content: center;
 }
 
 .event-card.small .event-card-title {
+  display: block;
   font-size: 11px;
   line-height: 1.2;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-/* Compact mode for smaller events */
+.event-card.no-title .event-card-time {
+  font-weight: 600;
+}
+
+/* Custom (personal) events */
+.event-card.custom-event {
+  border-left-style: solid;
+}
+
+.custom-event-pill-tag {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.bz-theme[data-theme="dark"] .custom-event-pill-tag {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Missed */
+.event-card.missed::after {
+  content: "Absent";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--bz-red);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+/* Compact (unused by default, kept for API compatibility) */
 .event-card.compact {
-  padding: 6px 8px;
+  padding: 2px 6px;
 }
 
 .event-card.compact .event-card-title {
-  font-size: 12px;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
-}
-
-.event-card.compact .event-card-time {
-  font-size: 10px;
-}
-
-.event-card.compact .event-card-location,
-.event-card.compact .event-card-groups {
-  font-size: 9px;
-}
-
-/* Responsive adjustments for day calendar */
-.event-day .event-card {
-  left: 12px;
-  right: 12px;
-  padding: 10px 12px;
-}
-
-.event-day .event-card-title {
-  font-size: 14px;
-  font-weight: 600;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-}
-
-.event-day .event-card-time {
-  font-size: 12px;
-}
-
-.event-day .event-card-location,
-.event-day .event-card-groups {
   font-size: 11px;
+}
+
+.event-card.compact .event-card-time,
+.event-card.compact .event-card-groups {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .event-card {
+    padding: 3px 4px 3px 5px;
+  }
+
+  .event-card-title {
+    font-size: 11px;
+  }
+
+  .event-card-time,
+  .event-card-location,
+  .event-card-groups {
+    font-size: 10px;
+  }
 }

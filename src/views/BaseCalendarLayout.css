@@ -1,87 +1,251 @@
-.btn-calendar-export {
-  display: inline-flex;
+/* Toolbar — single, quiet row (wraps on smaller screens) */
+
+.calendar-toolbar {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(0, 1fr) auto auto;
+  grid-template-areas: "lead views search nav actions";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 10px;
+  min-height: 60px;
+  padding: 10px 16px 10px 12px;
+  border-bottom: 1px solid var(--bz-separator);
+  background: var(--bz-bg);
+  flex-shrink: 0;
+}
+
+.toolbar-leading {
+  grid-area: lead;
+  display: flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #374151;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+  min-width: 0;
 }
 
-.btn-calendar-export:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+.toolbar-views {
+  grid-area: views;
+  display: flex;
+  justify-content: center;
 }
 
-.btn-calendar-export-label {
-  display: inline-block;
+.toolbar-views .bz-segmented {
+  min-width: 240px;
 }
 
-.btn-add-event {
+.toolbar-search {
+  grid-area: search;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.toolbar-search .bz-search {
+  width: 100%;
+  max-width: 220px;
+}
+
+.toolbar-nav {
+  grid-area: nav;
+  display: flex;
+}
+
+.toolbar-actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Title */
+.toolbar-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.toolbar-title .day-picker-container {
+  max-width: calc(100% + 6px);
+  margin: -2px 0 -2px -6px;
+}
+
+.toolbar-title-button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 40px;
-  padding: 0 14px;
-  border: 1px solid #7c3aed;
-  border-radius: 8px;
-  background: #7c3aed;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
+  max-width: 100%;
+  margin: 0;
+  padding: 2px 6px;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  background: transparent;
+  color: var(--bz-label);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s var(--bz-ease);
+}
+
+.toolbar-title-button:hover,
+.toolbar-title-button[aria-expanded="true"] {
+  background: var(--bz-fill-hover);
+}
+
+.toolbar-heading {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--bz-font-display);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--bz-label);
+}
+
+.toolbar-heading strong {
+  font-weight: 700;
+}
+
+.toolbar-heading span {
+  color: var(--bz-label-secondary);
+}
+
+.toolbar-title-chevron {
+  flex: 0 0 auto;
+  color: var(--bz-label-tertiary);
+  transition: transform 0.2s var(--bz-ease);
+}
+
+.toolbar-title-button[aria-expanded="true"] .toolbar-title-chevron {
+  transform: rotate(180deg);
+}
+
+.toolbar-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 16px;
+  color: var(--bz-label-secondary);
+  font-size: 12px;
+  line-height: 16px;
   white-space: nowrap;
 }
 
-.btn-add-event:hover {
-  background: #6d28d9;
-  border-color: #6d28d9;
+.toolbar-spinner {
+  width: 11px;
+  height: 11px;
+  border-width: 1.5px;
 }
 
-.btn-add-event-label {
-  display: inline-block;
+/* Previous / Today / Next */
+.toolbar-nav-group {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 2px;
+  border-radius: var(--bz-radius);
+  background: var(--bz-fill-secondary);
 }
 
-@media (max-width: 640px) {
-  .btn-calendar-export,
-  .btn-add-event {
-    width: 40px;
-    justify-content: center;
-    padding: 0;
+.toolbar-nav-button {
+  height: 28px;
+  min-width: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  background: transparent;
+  color: var(--bz-label-secondary);
+  cursor: pointer;
+  transition:
+    background-color 0.15s var(--bz-ease),
+    color 0.15s var(--bz-ease);
+}
+
+.toolbar-nav-button:hover {
+  background: var(--bz-fill-hover);
+  color: var(--bz-label);
+}
+
+.toolbar-nav-button:active {
+  background: var(--bz-fill-active);
+}
+
+.toolbar-today {
+  padding: 0 10px;
+  color: var(--bz-label);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Medium screens: two rows */
+@media (max-width: 1240px) {
+  .calendar-toolbar {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "lead lead nav actions"
+      "views search search search";
   }
 
-  .btn-calendar-export-label,
-  .btn-add-event-label {
-    display: none;
+  .toolbar-views {
+    justify-content: flex-start;
+  }
+
+  .toolbar-search .bz-search {
+    max-width: 320px;
   }
 }
 
-[data-theme="dark"] .btn-calendar-export {
-  background: #111827;
-  border-color: #374151;
-  color: #e5e7eb;
+/* Compact screens */
+@media (max-width: 720px) {
+  .calendar-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "lead lead actions"
+      "views nav nav"
+      "search search search";
+    padding: 8px 12px;
+    column-gap: 8px;
+  }
+
+  .toolbar-views .bz-segmented {
+    min-width: 0;
+    width: 100%;
+    grid-auto-columns: auto;
+  }
+
+  .toolbar-views {
+    min-width: 0;
+  }
+
+  .toolbar-views .bz-segmented-item {
+    padding: 0 8px;
+  }
+
+  .toolbar-search .bz-search {
+    max-width: none;
+  }
+
+  .toolbar-heading {
+    font-size: 19px;
+  }
+
+  .toolbar-today {
+    padding: 0 8px;
+  }
 }
 
-[data-theme="dark"] .btn-calendar-export:hover {
-  background: #1f2937;
-  border-color: #6366f1;
-}
+/* Short viewports: tighten vertical rhythm */
+@media (max-height: 760px) and (min-width: 721px) {
+  .calendar-toolbar {
+    min-height: 52px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
 
-[data-theme="dark"] .btn-add-event {
-  background: #7c3aed;
-  border-color: #7c3aed;
-  color: #ffffff;
-}
-
-[data-theme="dark"] .btn-add-event:hover {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  .toolbar-heading {
+    font-size: 20px;
+  }
 }

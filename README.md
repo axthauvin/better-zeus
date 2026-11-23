@@ -15,7 +15,7 @@ Zeus sucks. So i made a better version, with a cool UI.
 
 ---
 
-<img src="./.github/presentation.png">
+<img src="./.github/presentation.png" alt="Better Zeus week view">
 
 ## Installation (Chrome based browsers & Firefox)
 
@@ -25,21 +25,48 @@ Check the release page and follow the instructions :
 
 ## Features
 
-- Daily and weekly view of the calendar, with a clear indication of the current day and week.
-- Colored events based on their type (project, piscine, etc.) for easy identification.
-- Responsive design that adapts to different screen sizes and devices.
-- Selected courses stays even when you refresh the page, so **you don't have to select them again**.
-- Export your calendar in iCal format, so you can import it in your favorite calendar app (Google Calendar, Outlook, etc.).
+- **Day, week and month views** with a clean, Apple-inspired design — today and the current time are always easy to spot.
+- **Light and dark mode**, switchable in one click (or with the `D` key).
+- **Colored events by course type** (lecture, practical, exam, conference…) for quick reading.
+- **Groups, rooms or teachers**: pick what you want to see from the sidebar, your selection is remembered.
+- **Personal events**: add your own events to the calendar and edit them with a simple click.
+- **Calendar subscription (iCal)**: subscribe to your groups in Apple Calendar, Google Calendar or Outlook, or download the current view as `.ics`.
+- **Keyboard shortcuts**: `←` `→` to navigate, `T` for today, `J` `S` `M` to switch view, `N` for a new event, `/` to search.
+- **Responsive** layout that works on small screens too.
 
 ---
 
 ## Screenshots & Demos
 
+![Week view](./.github/presentation.png)
+
+**Jump to any date** — click the title to open the date picker.
+
 ![Choose the week](./.github/choose-the-week.png)
+
+**Event details** — everything about a course at a glance.
 
 ![Events](./.github/events.png)
 
+**Personal events** — click one of your events to edit it.
+
+![Personal events](./.github/personal-events.png)
+
+**Month view**
+
+![Month view](./.github/month-view.png)
+
+**Dark mode** — and every option in a single menu.
+
+![Dark mode](./.github/dark-mode.png)
+
+**Subscribe in your calendar app**
+
 ![iCal Export](./.github/ical-export.png)
+
+**Sign in**
+
+![Login](./.github/login.png)
 
 ## Contributing
 

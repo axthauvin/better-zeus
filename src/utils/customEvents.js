@@ -1,7 +1,7 @@
 export const CUSTOM_EVENTS_STORAGE_KEY = "better-zeus-custom-events";
 
 // Distinctive yellow color that does not clash with standard Zeus course types
-export const DEFAULT_CUSTOM_EVENT_COLOR = "#EAB308";
+export const DEFAULT_CUSTOM_EVENT_COLOR = "#FFCC00";
 
 /**
  * Retrieve all custom events from localStorage.

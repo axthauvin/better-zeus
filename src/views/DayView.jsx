@@ -22,6 +22,7 @@ import {
   formatHour,
 } from "../utils/calendarHelpers";
 import { CALENDAR_CONFIG } from "../utils/calendarConstants";
+import { capitalize } from "../utils/formatTitle";
 import "../components/DayCalendar.css";
 
 const DayView = ({
@@ -113,7 +114,11 @@ const DayView = ({
   const showIndicator = shouldShowTimeIndicator(currentTime, isToday());
 
   // Header configuration
-  const headerTitle = format(currentDate, "EEEE d MMMM yyyy", { locale: fr });
+  const titleStrong = format(currentDate, "d MMMM", { locale: fr });
+  const titleLight = format(currentDate, "yyyy");
+  const headerSubtitle = capitalize(
+    format(currentDate, "EEEE", { locale: fr }),
+  );
 
   return (
     <BaseCalendarLayout
@@ -124,8 +129,10 @@ const DayView = ({
       onNext={handleNext}
       onToday={handleToday}
       onDateChange={handleDateChange}
-      headerTitle={headerTitle}
-      events={events}
+      titleStrong={titleStrong}
+      titleLight={titleLight}
+      subtitle={isToday() ? `${headerSubtitle} · Aujourd'hui` : headerSubtitle}
+      loading={loading}
       selectedEvent={selectedEvent}
       onCloseModal={handleCloseModal}
       eventSearchQuery={eventSearchQuery}
@@ -158,16 +165,13 @@ const DayView = ({
         <div className="day-grid">
           {/* Day headers */}
           <div className="day-headers" style={{ gridTemplateColumns: "none" }}>
-            <div
-              className={`day-header ${isToday(currentDate) ? "today" : ""}`}
-            >
-              <span className="day-name">
-                {format(currentDate, "EEE", { locale: fr })}{" "}
-                {!isToday(currentDate) && format(currentDate, "d")}
+            <div className={`day-header ${isToday() ? "today" : ""}`}>
+              <span className="day-header-weekday">
+                {format(currentDate, "EEEE", { locale: fr })}
               </span>
-              {isToday(currentDate) && (
-                <span className="today-badge">{format(currentDate, "d")}</span>
-              )}
+              <span className="day-header-date">
+                {format(currentDate, "d")}
+              </span>
             </div>
           </div>
 
@@ -178,8 +182,7 @@ const DayView = ({
                 key={hour}
                 className="hour-row-day"
                 onClick={() => handleSlotClick(hour)}
-                style={{ cursor: "pointer" }}
-                title={`Ajouter un événement à ${formatHour(hour)}`}
+                title={`Nouvel événement à ${formatHour(hour)}`}
               ></div>
             ))}
           </div>
@@ -203,7 +206,7 @@ const DayView = ({
             <div className="events-container-day">
               {dayEvents.length === 0 ? (
                 <div className="no-events-day">
-                  <p>Aucun événement prévu ce jour</p>
+                  <p>Aucun événement</p>
                 </div>
               ) : (
                 getEventLayouts(dayEvents, CALENDAR_CONFIG.HOUR_HEIGHT).map(

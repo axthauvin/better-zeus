@@ -1,16 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
-import {
-  X,
-  Plus,
-  Calendar,
-  Clock,
-  MapPin,
-  User,
-  AlignLeft,
-  Video,
-  ChevronDown,
-} from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import { DEFAULT_CUSTOM_EVENT_COLOR } from "../utils/customEvents";
 import "./CreateEventModal.css";
 
@@ -18,10 +8,15 @@ const CreateEventModal = ({
   isOpen,
   onClose,
   onSubmit,
-  initialDate = new Date(),
+  // No default here: a fresh `new Date()` each render would re-run the
+  // initialisation effect and wipe what the user is typing.
+  initialDate,
   initialStartTime,
   initialEndTime,
+  editingEvent = null,
+  onDelete,
 }) => {
+  const isEditing = !!editingEvent;
   const modalRef = useRef(null);
   const titleInputRef = useRef(null);
 
@@ -47,6 +42,29 @@ const CreateEventModal = ({
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (isOpen && editingEvent) {
+      const start = new Date(editingEvent.start);
+      const end = new Date(editingEvent.end);
+      setTitle(editingEvent.title || "");
+      setDate(format(start, "yyyy-MM-dd"));
+      setStartTime(format(start, "HH:mm"));
+      setEndTime(format(end, "HH:mm"));
+      setLocation(editingEvent.location || "");
+      setTeacher(editingEvent.teacher || "");
+      setIsOnline(!!editingEvent.isOnline);
+      setOnlineUrl(editingEvent.onlineUrl || "");
+      setDescription(editingEvent.description || "");
+      setError("");
+      setShowMoreOptions(
+        !!(
+          editingEvent.teacher ||
+          editingEvent.isOnline ||
+          editingEvent.description
+        ),
+      );
+      return;
+    }
+
     if (isOpen) {
       setDate(getInitialDateStr());
       setTitle("");
@@ -75,7 +93,7 @@ const CreateEventModal = ({
         titleInputRef.current?.focus();
       }, 50);
     }
-  }, [isOpen, initialDate, initialStartTime, initialEndTime]);
+  }, [isOpen, initialDate, initialStartTime, initialEndTime, editingEvent]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -119,10 +137,11 @@ const CreateEventModal = ({
     }
 
     const eventPayload = {
+      ...(isEditing ? { id: editingEvent.id } : {}),
       title: title.trim(),
       start: startDate,
       end: endDate,
-      color: DEFAULT_CUSTOM_EVENT_COLOR,
+      color: (isEditing && editingEvent.color) || DEFAULT_CUSTOM_EVENT_COLOR,
       location: location.trim(),
       teacher: teacher.trim(),
       type: "Personnel",
@@ -143,201 +162,187 @@ const CreateEventModal = ({
   };
 
   return (
-    <div className="create-event-overlay" onClick={handleOverlayClick}>
-      <div className="create-event-modal" ref={modalRef}>
-        <div className="create-event-header">
-          <div className="create-event-header-info">
-            <div className="create-event-icon-badge">
-              <Plus size={20} />
-            </div>
-            <div>
-              <h2 className="create-event-title">Nouvel événement</h2>
-              <p className="create-event-subtitle">
-                Ajouter un événement personnalisé à votre planning
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="create-event-close"
-            onClick={onClose}
-            aria-label="Fermer"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
+    <div
+      className="bz-overlay create-event-overlay"
+      onClick={handleOverlayClick}
+    >
+      <div
+        className="bz-sheet create-event-modal"
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-event-title"
+      >
         <form onSubmit={handleSubmit} className="create-event-form">
-          <div className="create-event-body">
+          <div className="create-event-header">
+            <button
+              type="button"
+              className="bz-button bz-button-plain create-event-header-button"
+              onClick={onClose}
+            >
+              Annuler
+            </button>
+            <h2 className="create-event-title" id="create-event-title">
+              {isEditing ? "Modifier l'événement" : "Nouvel événement"}
+            </h2>
+            <button
+              type="submit"
+              className="bz-button bz-button-plain create-event-header-button create-event-header-submit"
+              disabled={!title.trim()}
+            >
+              {isEditing ? "OK" : "Ajouter"}
+            </button>
+          </div>
+
+          <div className="create-event-body bz-scroll">
             {error && <div className="create-event-error">{error}</div>}
 
-            {/* Titre */}
-            <div className="form-group">
-              <label htmlFor="custom-event-title" className="form-label">
-                Titre
-              </label>
+            <div className="bz-group create-event-group">
               <input
                 id="custom-event-title"
                 ref={titleInputRef}
                 type="text"
-                className="form-input form-input-title"
-                placeholder="ex: Révision Maths, Projet Info, Rendez-vous..."
+                className="create-event-field create-event-field-title"
+                placeholder="Titre"
+                aria-label="Titre"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={100}
               />
+              <input
+                id="custom-event-location"
+                type="text"
+                className="create-event-field"
+                placeholder="Lieu"
+                aria-label="Lieu"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
             </div>
 
-            {/* Date et Horaires */}
-            <div className="form-row form-row-2">
-              <div className="form-group">
-                <label htmlFor="custom-event-date" className="form-label">
-                  <Calendar size={14} /> Date
-                </label>
+            <div className="bz-group create-event-group">
+              <div className="bz-group-row create-event-row">
+                <label htmlFor="custom-event-date">Date</label>
                 <input
                   id="custom-event-date"
                   type="date"
-                  className="form-input"
+                  className="create-event-chip"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
                 />
               </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  <Clock size={14} /> Horaires
-                </label>
-                <div className="time-inputs-container">
-                  <input
-                    type="time"
-                    className="form-input time-input"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    required
-                  />
-                  <span className="time-separator">à</span>
-                  <input
-                    type="time"
-                    className="form-input time-input"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    required
-                  />
-                </div>
+              <div className="bz-group-row create-event-row">
+                <label htmlFor="custom-event-start">Début</label>
+                <input
+                  id="custom-event-start"
+                  type="time"
+                  className="create-event-chip"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="bz-group-row create-event-row">
+                <label htmlFor="custom-event-end">Fin</label>
+                <input
+                  id="custom-event-end"
+                  type="time"
+                  className="create-event-chip"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  required
+                />
               </div>
             </div>
 
-            {/* Bouton pour dérouler les options supplémentaires */}
             <button
               type="button"
               className="more-options-toggle-btn"
               onClick={() => setShowMoreOptions((prev) => !prev)}
+              aria-expanded={showMoreOptions}
             >
-              <span>
-                {showMoreOptions
-                  ? "Masquer les détails"
-                  : "Plus d'options (salle, intervenant, description...)"}
-              </span>
+              <span>{showMoreOptions ? "Moins d'options" : "Plus d'options"}</span>
               <ChevronDown
-                size={16}
+                size={14}
+                strokeWidth={2.25}
                 className={`toggle-chevron ${showMoreOptions ? "open" : ""}`}
               />
             </button>
 
-            {/* Section déroulante : Salle, Intervenant, En ligne, Description */}
             {showMoreOptions && (
               <div className="more-options-section">
-                <div className="form-row form-row-2">
-                  <div className="form-group">
-                    <label htmlFor="custom-event-location" className="form-label">
-                      <MapPin size={14} /> Salle / Lieu
-                    </label>
-                    <input
-                      id="custom-event-location"
-                      type="text"
-                      className="form-input"
-                      placeholder="ex: Salle 301, BU..."
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="custom-event-teacher" className="form-label">
-                      <User size={14} /> Intervenant / Responsable
-                    </label>
-                    <input
-                      id="custom-event-teacher"
-                      type="text"
-                      className="form-input"
-                      placeholder="ex: M. Dupont..."
-                      value={teacher}
-                      onChange={(e) => setTeacher(e.target.value)}
-                    />
-                  </div>
+                <div className="bz-group create-event-group">
+                  <input
+                    id="custom-event-teacher"
+                    type="text"
+                    className="create-event-field"
+                    placeholder="Intervenant"
+                    aria-label="Intervenant"
+                    value={teacher}
+                    onChange={(e) => setTeacher(e.target.value)}
+                  />
                 </div>
 
-                {/* Option En ligne */}
-                <div className="form-group online-toggle-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={isOnline}
-                      onChange={(e) => setIsOnline(e.target.checked)}
+                <div className="bz-group create-event-group">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isOnline}
+                    className="bz-group-row create-event-row create-event-switch-row"
+                    onClick={() => setIsOnline((prev) => !prev)}
+                  >
+                    <span>En ligne</span>
+                    <span
+                      className={`bz-switch ${isOnline ? "on" : ""}`}
+                      aria-hidden="true"
                     />
-                    <span className="checkbox-text">
-                      <Video size={16} /> Événement / Réunion en ligne
-                    </span>
-                  </label>
-                </div>
-
-                {isOnline && (
-                  <div className="form-group">
-                    <label htmlFor="custom-event-url" className="form-label">
-                      Lien de la réunion / visio
-                    </label>
+                  </button>
+                  {isOnline && (
                     <input
                       id="custom-event-url"
                       type="url"
-                      className="form-input"
-                      placeholder="https://meet.google.com/... ou Teams / Zoom"
+                      className="create-event-field"
+                      placeholder="Lien de la réunion"
+                      aria-label="Lien de la réunion"
                       value={onlineUrl}
                       onChange={(e) => setOnlineUrl(e.target.value)}
                     />
-                  </div>
-                )}
+                  )}
+                </div>
 
-                {/* Description */}
-                <div className="form-group">
-                  <label htmlFor="custom-event-description" className="form-label">
-                    <AlignLeft size={14} /> Description / Notes
-                  </label>
+                <div className="bz-group create-event-group">
                   <textarea
                     id="custom-event-description"
-                    className="form-textarea"
-                    rows={2}
-                    placeholder="Détails, ordre du jour, notes..."
+                    className="create-event-field create-event-notes"
+                    rows={3}
+                    placeholder="Notes"
+                    aria-label="Notes"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
               </div>
             )}
-          </div>
 
-          <div className="create-event-footer">
-            <button
-              type="button"
-              className="btn-modal-cancel"
-              onClick={onClose}
-            >
-              Annuler
-            </button>
-            <button type="submit" className="btn-modal-submit">
-              <Plus size={16} />
-              Ajouter l'événement
-            </button>
+            {isEditing && onDelete && (
+              <button
+                type="button"
+                className="bz-button bz-button-destructive create-event-delete"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Supprimer cet événement ? Cette action est irréversible.",
+                    )
+                  ) {
+                    onDelete(editingEvent.id);
+                    onClose();
+                  }
+                }}
+              >
+                Supprimer l'événement
+              </button>
+            )}
           </div>
         </form>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./UpdateNotifier.css";
+import BrandMark from "./BrandMark";
 
 const UpdateNotifier = ({ theme }) => {
   const [updateVersion, setUpdateVersion] = useState(null);
@@ -50,26 +51,32 @@ const UpdateNotifier = ({ theme }) => {
   if (!updateVersion) return null;
 
   return (
-    <div className={`update-notifier ${theme === "dark" ? "dark" : ""}`}>
+    <div className="update-notifier" role="status">
+      <BrandMark className="update-notifier-icon" />
       <div className="update-notifier-content">
-        <h3>Mise à jour disponible !</h3>
-        <p>La version {updateVersion} de Better Zeus est disponible.</p>
+        <h3>Mise à jour disponible</h3>
+        <p>Better Zeus {updateVersion} est disponible.</p>
       </div>
       <div className="update-notifier-actions">
         <button
-          className="update-btn-primary"
+          type="button"
+          className="bz-button bz-button-secondary"
+          onClick={() => setUpdateVersion(null)}
+        >
+          Plus tard
+        </button>
+        <button
+          type="button"
+          className="bz-button bz-button-primary"
           onClick={() => {
-            window.open("https://github.com/Axthauvin/better-zeus/releases/latest", "_blank");
+            window.open(
+              "https://github.com/Axthauvin/better-zeus/releases/latest",
+              "_blank",
+            );
             setUpdateVersion(null);
           }}
         >
-          Voir les nouveautés
-        </button>
-        <button
-          className="update-btn-secondary"
-          onClick={() => setUpdateVersion(null)}
-        >
-          Fermer
+          Voir
         </button>
       </div>
     </div>

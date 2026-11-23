@@ -1,23 +1,44 @@
 import React from "react";
-import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MyDayPicker } from "../components/DayPicker";
-import { Search, Sun, Moon, Menu, Github, Calendar, Plus } from "lucide-react";
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-} from "../components/CalendarIcons";
+  Search,
+  PanelLeft,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  X,
+  Sun,
+  Moon,
+} from "lucide-react";
+import { MyDayPicker } from "../components/DayPicker";
 import EventModal from "../components/EventModal";
 import CreateEventModal from "../components/CreateEventModal";
-import PresenceMenu from "../components/PresenceMenu";
-import DataMenu from "../components/DataMenu";
+import AppMenu from "../components/AppMenu";
 import "../components/WeekCalendar.css";
 import "./BaseCalendarLayout.css";
 
+const VIEWS = [
+  { id: "day", label: "Jour", shortcut: "J" },
+  { id: "week", label: "Semaine", shortcut: "S" },
+  { id: "month", label: "Mois", shortcut: "M" },
+];
+
+const PERIOD_LABELS = {
+  day: { previous: "Jour précédent", next: "Jour suivant" },
+  week: { previous: "Semaine précédente", next: "Semaine suivante" },
+  month: { previous: "Mois précédent", next: "Mois suivant" },
+};
+
+const isTypingTarget = (element) =>
+  !!element &&
+  (["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName) ||
+    element.isContentEditable);
+
 /**
  * BaseCalendarLayout - Shared layout component for calendar views
- * Provides common header, navigation, and view switching
+ * Provides the toolbar (title, navigation, view switcher, search, actions)
+ * and keyboard shortcuts.
  */
 const BaseCalendarLayout = ({
   view = "week",
@@ -27,9 +48,10 @@ const BaseCalendarLayout = ({
   onNext,
   onToday,
   onDateChange,
-  headerTitle,
-  headerSubtitle,
-  monthDay,
+  titleStrong,
+  titleLight,
+  subtitle,
+  loading = false,
   eventSearchQuery = "",
   onEventSearchQueryChange = () => {},
   theme = "light",
@@ -47,162 +69,246 @@ const BaseCalendarLayout = ({
   children,
   className = "",
 }) => {
-  const [internalCreateModalOpen, setInternalCreateModalOpen] = React.useState(false);
+  const [internalCreateModalOpen, setInternalCreateModalOpen] =
+    React.useState(false);
+  const searchInputRef = React.useRef(null);
+
+  const openCreateModal = () => {
+    if (onOpenCreateModal) {
+      onOpenCreateModal({ date: currentDate });
+    } else {
+      setInternalCreateModalOpen(true);
+    }
+  };
+
+  // Keep the latest handlers in a ref so the keydown listener stays stable
+  const handlersRef = React.useRef({});
+  handlersRef.current = {
+    onPrevious,
+    onNext,
+    onToday,
+    onViewChange,
+    openCreateModal,
+    onToggleTheme,
+  };
+
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(document.activeElement)) return;
+      // Ignore shortcuts while a sheet or popover is open
+      if (document.querySelector(".bz-overlay, .bz-popover")) return;
+
+      const handlers = handlersRef.current;
+      const key = e.key.toLowerCase();
+
+      if (e.key === "ArrowLeft") handlers.onPrevious?.();
+      else if (e.key === "ArrowRight") handlers.onNext?.();
+      else if (key === "t") handlers.onToday?.();
+      else if (key === "j") handlers.onViewChange?.("day");
+      else if (key === "s") handlers.onViewChange?.("week");
+      else if (key === "m") handlers.onViewChange?.("month");
+      else if (key === "n") handlers.openCreateModal?.();
+      else if (key === "d") handlers.onToggleTheme?.();
+      else if (e.key === "/") searchInputRef.current?.focus();
+      else return;
+
+      e.preventDefault();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const periodLabels = PERIOD_LABELS[view] || PERIOD_LABELS.week;
+
   return (
     <div className={`calendar-view ${className}`}>
-      <div className="calendar-header">
-        <div className="calendar-header-main">
-          <div className="calendar-header-left">
-            <div className="calendar-date-info">
-              <div className="calendar-date-badges">
-                <button
-                  className="btn-icon btn-sidebar-toggle"
-                  onClick={onToggleSidebar}
-                  aria-label="Afficher/masquer le menu"
-                  title="Menu"
-                >
-                  <Menu size={18} />
-                </button>
-                <div className="calendar-month-day">
-                  <span className="month-label">
-                    {format(currentDate, "MMM", { locale: fr }).toUpperCase()}
-                  </span>
-                  <span className="day-number">
-                    {monthDay || format(currentDate, "d")}
-                  </span>
-                </div>
-              </div>
-              <div className="calendar-title-info">
-                <h2>{headerTitle}</h2>
-                {headerSubtitle && <p>{headerSubtitle}</p>}
-              </div>
-            </div>
-          </div>
+      <header className="calendar-toolbar">
+        <div className="toolbar-leading">
+          <button
+            type="button"
+            className="bz-icon-button"
+            onClick={onToggleSidebar}
+            aria-label="Afficher ou masquer la barre latérale"
+            title="Barre latérale"
+          >
+            <PanelLeft size={18} strokeWidth={1.75} />
+          </button>
 
-          <div className="calendar-header-right">
-            <PresenceMenu />
-            <button
-              className="btn-add-event"
-              onClick={() => {
-                if (onOpenCreateModal) {
-                  onOpenCreateModal({ date: currentDate });
-                } else {
-                  setInternalCreateModalOpen(true);
-                }
-              }}
-              aria-label="Ajouter un événement"
-              title="Ajouter un événement"
-              type="button"
-            >
-              <Plus size={16} />
-              <span className="btn-add-event-label">Événement</span>
-            </button>
-            <button
-              className="btn-calendar-export"
-              onClick={onOpenCalendarExport}
-              aria-label="Ajouter a mon calendrier"
-              title="Ajouter a mon calendrier"
-              type="button"
-            >
-              <Calendar size={16} />
-              <span className="btn-calendar-export-label">
-                Ajouter a mon calendrier
-              </span>
-            </button>
-            <DataMenu exportEvents={exportEvents} />
-            <a
-              className="btn-icon btn-github"
-              href="https://github.com/Axthauvin/better-zeus"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Ouvrir le depot GitHub"
-              title="GitHub"
-            >
-              <Github size={18} />
-            </a>
-            <button
-              className="btn-icon btn-theme"
-              onClick={onToggleTheme}
-              aria-label={
-                theme === "dark"
-                  ? "Activer le theme clair"
-                  : "Activer le theme sombre"
-              }
-              title={theme === "dark" ? "Theme clair" : "Theme sombre"}
-            >
-              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-          </div>
-        </div>
-
-        <div className="calendar-toolbar">
-          <div className="calendar-nav">
-            <button
-              className="btn-icon"
-              onClick={onPrevious}
-              aria-label="Precedent"
-            >
-              <ChevronLeftIcon />
-            </button>
-            <button className="btn-today" onClick={onToday}>
-              Aujourd'hui
-            </button>
+          <div className="toolbar-title">
             <MyDayPicker
               value={currentDate}
               onChange={onDateChange}
               locale={fr}
               mode={view}
-            />
-            <button className="btn-icon" onClick={onNext} aria-label="Suivant">
-              <ChevronRightIcon />
-            </button>
-          </div>
-
-          <div className="view-dropdown">
-            <button className="btn-view">
-              {view === "month" ? "Mois" : view === "week" ? "Semaine" : "Jour"}
-              <ChevronDownIcon />
-            </button>
-            <div className="view-menu">
-              <button
-                onClick={() => onViewChange("month")}
-                className={view === "month" ? "active" : ""}
-              >
-                Mois
-              </button>
-              <button
-                onClick={() => onViewChange("week")}
-                className={view === "week" ? "active" : ""}
-              >
-                Semaine
-              </button>
-              <button
-                onClick={() => onViewChange("day")}
-                className={view === "day" ? "active" : ""}
-              >
-                Jour
-              </button>
-            </div>
-          </div>
-
-          <div className="calendar-search">
-            <Search size={14} />
-            <input
-              type="text"
-              placeholder="Rechercher un cours, prof, salle..."
-              value={eventSearchQuery}
-              onChange={(e) => onEventSearchQueryChange(e.target.value)}
-            />
+              triggerClassName="toolbar-title-button"
+              triggerLabel="Choisir une date"
+            >
+              <h1 className="toolbar-heading">
+                <strong>{titleStrong}</strong>
+                {titleLight && <span> {titleLight}</span>}
+              </h1>
+              <ChevronDown
+                size={16}
+                strokeWidth={2.25}
+                className="toolbar-title-chevron"
+              />
+            </MyDayPicker>
+            {(subtitle || loading) && (
+              <div className="toolbar-subtitle">
+                {subtitle && <span>{subtitle}</span>}
+                {loading && (
+                  <span
+                    className="bz-spinner toolbar-spinner"
+                    role="status"
+                    aria-label="Chargement"
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
-      </div>
+
+        <div className="toolbar-views">
+          <div
+            className="bz-segmented"
+            role="tablist"
+            aria-label="Affichage du calendrier"
+          >
+            {VIEWS.map(({ id, label, shortcut }) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={view === id}
+                className={`bz-segmented-item ${view === id ? "active" : ""}`}
+                onClick={() => view !== id && onViewChange(id)}
+                title={`${label} (${shortcut})`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="toolbar-search">
+          <label className="bz-search">
+            <Search size={14} strokeWidth={2} />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Rechercher"
+              value={eventSearchQuery}
+              onChange={(e) => onEventSearchQueryChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  onEventSearchQueryChange("");
+                  e.currentTarget.blur();
+                }
+              }}
+              aria-label="Rechercher un cours, un enseignant ou une salle"
+            />
+            {eventSearchQuery && (
+              <button
+                type="button"
+                className="bz-search-clear"
+                onClick={() => {
+                  onEventSearchQueryChange("");
+                  searchInputRef.current?.focus();
+                }}
+                aria-label="Effacer la recherche"
+              >
+                <X size={10} strokeWidth={3} />
+              </button>
+            )}
+          </label>
+        </div>
+
+        <div className="toolbar-nav">
+          <div className="toolbar-nav-group">
+            <button
+              type="button"
+              className="toolbar-nav-button"
+              onClick={onPrevious}
+              aria-label={periodLabels.previous}
+              title={`${periodLabels.previous} (←)`}
+            >
+              <ChevronLeft size={17} strokeWidth={2} />
+            </button>
+            <button
+              type="button"
+              className="toolbar-nav-button toolbar-today"
+              onClick={onToday}
+              title="Aujourd'hui (T)"
+            >
+              Aujourd'hui
+            </button>
+            <button
+              type="button"
+              className="toolbar-nav-button"
+              onClick={onNext}
+              aria-label={periodLabels.next}
+              title={`${periodLabels.next} (→)`}
+            >
+              <ChevronRight size={17} strokeWidth={2} />
+            </button>
+          </div>
+        </div>
+
+        <div className="toolbar-actions">
+          <button
+            type="button"
+            className="bz-icon-button"
+            onClick={openCreateModal}
+            aria-label="Nouvel événement"
+            title="Nouvel événement (N)"
+          >
+            <Plus size={19} strokeWidth={1.75} />
+          </button>
+          <button
+            type="button"
+            className="bz-icon-button theme-toggle"
+            onClick={onToggleTheme}
+            aria-label={
+              theme === "dark"
+                ? "Passer en apparence claire"
+                : "Passer en apparence sombre"
+            }
+            title={
+              theme === "dark" ? "Apparence claire (D)" : "Apparence sombre (D)"
+            }
+          >
+            {theme === "dark" ? (
+              <Sun size={18} strokeWidth={1.75} />
+            ) : (
+              <Moon size={17} strokeWidth={1.75} />
+            )}
+          </button>
+          <AppMenu
+            exportEvents={exportEvents}
+            onOpenCalendarExport={onOpenCalendarExport}
+          />
+        </div>
+      </header>
 
       {children}
 
-      {selectedEvent && (
+      {selectedEvent && !selectedEvent.isCustom && (
         <EventModal
           event={selectedEvent}
           onClose={onCloseModal}
+          onDelete={onDeleteEvent}
+        />
+      )}
+
+      {/* Personal events open straight into the edit sheet */}
+      {selectedEvent?.isCustom && (
+        <CreateEventModal
+          isOpen
+          editingEvent={selectedEvent}
+          onClose={onCloseModal}
+          onSubmit={onCreateEvent}
           onDelete={onDeleteEvent}
         />
       )}

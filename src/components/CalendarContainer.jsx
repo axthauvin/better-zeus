@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+// Design tokens first, so component styles can override the primitives
+import "../styles/theme.css";
 import GroupSelector from "./GroupSelector";
 import CalendarExportModal from "./CalendarExportModal";
 import UpdateNotifier from "./UpdateNotifier";
@@ -21,16 +23,12 @@ import {
   endOfDay,
   startOfMonth,
   endOfMonth,
-  addWeeks,
-  subWeeks,
-  addMonths,
-  subMonths,
 } from "date-fns";
 import { fr } from "date-fns/locale";
 import BaseCalendarLayout from "../views/BaseCalendarLayout";
 import WeekView from "../views/WeekView";
 import DayView from "../views/DayView";
-import MonthView from "../views/MonthView"; // <-- Added MonthView
+import MonthView from "../views/MonthView";
 import {
   getCustomEvents,
   saveCustomEvent,
@@ -54,6 +52,7 @@ const CalendarContainer = () => {
   const [selectionMode, setSelectionMode] = useState("groups");
   const [eventSearchQuery, setEventSearchQuery] = useState("");
   const [isCalendarExportOpen, setIsCalendarExportOpen] = useState(false);
+  const [isErrorDismissed, setIsErrorDismissed] = useState(false);
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem("better-zeus-theme");
     if (savedTheme === "light" || savedTheme === "dark") {
@@ -127,58 +126,12 @@ const CalendarContainer = () => {
     );
   }, [isSidebarCollapsed]);
 
-  useEffect(() => {
-    const handleGlobalKeyDown = (e) => {
-      // Ignorer si l'utilisateur tape dans un champ de recherche
-      if (
-        document.activeElement &&
-        ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)
-      ) {
-        return;
-      }
-
-      let newDate;
-      if (e.key === "ArrowLeft") {
-        newDate =
-          view === "month"
-            ? subMonths(currentDate, 1)
-            : subWeeks(currentDate, 1);
-      } else if (e.key === "ArrowRight") {
-        newDate =
-          view === "month"
-            ? addMonths(currentDate, 1)
-            : addWeeks(currentDate, 1);
-      }
-
-      if (newDate) {
-        setCurrentDate(newDate);
-        let start, end;
-        if (view === "month") {
-          start = startOfWeek(startOfMonth(newDate), {
-            locale: fr,
-            weekStartsOn: 1,
-          });
-          end = endOfWeek(endOfMonth(newDate), { locale: fr, weekStartsOn: 1 });
-        } else if (view === "week") {
-          start = startOfWeek(newDate, { locale: fr, weekStartsOn: 1 });
-          end = endOfWeek(newDate, { locale: fr, weekStartsOn: 1 });
-        } else {
-          start = startOfDay(newDate);
-          end = endOfDay(newDate);
-        }
-        loadEvents(start, end, activeGroups);
-      }
-    };
-
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [currentDate, activeGroups]);
-
   // Fetch events from API
   const loadEvents = async (startDate, endDate, groups) => {
     try {
       setLoading(true);
       setError(null);
+      setIsErrorDismissed(false);
 
       // If no groups selected, clear events
       if (!groups || groups.length === 0) {
@@ -428,7 +381,7 @@ const CalendarContainer = () => {
 
   return (
     <div
-      className={`calendar-container ${isSidebarOpen ? "sidebar-open" : ""} ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}
+      className={`calendar-container bz-theme ${isSidebarOpen ? "sidebar-open" : ""} ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}
       data-theme={theme}
     >
       <div
@@ -519,21 +472,31 @@ const CalendarContainer = () => {
           />
         )}
 
-        {error && (
-          <div
-            style={{
-              padding: "12px",
-              background: "#FEF2F2",
-              border: "1px solid #FCA5A5",
-              borderRadius: "8px",
-              margin: "16px 24px",
-              color: "#991B1B",
-              fontSize: "13px",
-            }}
-          >
-            {error.includes("401")
-              ? "Votre session a expiré. Veuillez raffraichir la page pour vous reconnecter."
-              : `Erreur API : ${error}. Affichage des données de test.`}
+        {error && !isErrorDismissed && (
+          <div className="calendar-error-banner" role="alert">
+            <span className="calendar-error-dot" aria-hidden="true" />
+            <p>
+              {error.includes("401")
+                ? "Votre session a expiré. Actualisez la page pour vous reconnecter."
+                : `Impossible de charger le planning (${error}).`}
+            </p>
+            {error.includes("401") ? (
+              <button
+                type="button"
+                className="bz-button bz-button-plain"
+                onClick={() => window.location.reload()}
+              >
+                Actualiser
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="bz-button bz-button-plain"
+                onClick={() => setIsErrorDismissed(true)}
+              >
+                Masquer
+              </button>
+            )}
           </div>
         )}
       </div>

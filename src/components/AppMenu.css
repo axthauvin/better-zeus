@@ -1,0 +1,48 @@
+.app-menu {
+  position: relative;
+}
+
+.app-menu-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 200;
+  width: 268px;
+}
+
+.app-menu-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: 5px -5px -5px;
+  padding: 10px 14px 11px;
+  border-top: 1px solid var(--bz-separator);
+  color: var(--bz-label-tertiary);
+  font-size: 11px;
+}
+
+.app-menu-shortcuts span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.app-menu-shortcuts kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--bz-fill);
+  color: var(--bz-label-secondary);
+  font-family: var(--bz-font);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.app-menu-shortcuts span kbd:last-of-type {
+  margin-right: 2px;
+}

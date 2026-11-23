@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Check, Copy, Calendar, Loader2, X } from "lucide-react";
+import { Check, Copy, X } from "lucide-react";
 import { buildCalendarExportLink, fetchCalendarExportToken } from "../api";
 import "./EventModal.css";
 import "./CalendarExportModal.css";
@@ -60,6 +60,14 @@ const CalendarExportModal = ({ selectedGroups = [], onClose }) => {
     return () => window.clearTimeout(timeoutId);
   }, [copiedGroupId]);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   const handleOverlayClick = (event) => {
     if (event.target === event.currentTarget) {
       onClose();
@@ -95,8 +103,7 @@ const CalendarExportModal = ({ selectedGroups = [], onClose }) => {
     if (selectedGroups.length === 0) {
       return (
         <div className="calendar-export-empty">
-          <Calendar size={20} />
-          <p>Sélectionne au moins un groupe pour générer un lien iCal.</p>
+          <p>Ajoutez au moins un groupe dans la barre latérale.</p>
         </div>
       );
     }
@@ -104,8 +111,8 @@ const CalendarExportModal = ({ selectedGroups = [], onClose }) => {
     if (loading) {
       return (
         <div className="calendar-export-state">
-          <Loader2 className="calendar-export-spinner" size={20} />
-          <p>Récupération du token de synchronisation...</p>
+          <span className="bz-spinner" />
+          <p>Préparation des liens…</p>
         </div>
       );
     }
@@ -132,11 +139,15 @@ const CalendarExportModal = ({ selectedGroups = [], onClose }) => {
                   <p className="calendar-export-group-id">Groupe {group.id}</p>
                 </div>
                 <button
-                  className="calendar-export-copy"
+                  className={`bz-button bz-button-primary calendar-export-copy ${isCopied ? "copied" : ""}`}
                   onClick={() => handleCopy(link, group.id)}
                   type="button"
                 >
-                  {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                  {isCopied ? (
+                    <Check size={14} strokeWidth={2.5} />
+                  ) : (
+                    <Copy size={14} strokeWidth={2} />
+                  )}
                   <span>{isCopied ? "Copié" : "Copier"}</span>
                 </button>
               </div>
@@ -154,39 +165,39 @@ const CalendarExportModal = ({ selectedGroups = [], onClose }) => {
   };
 
   return (
-    <div className="event-modal-overlay" onClick={handleOverlayClick}>
-      <div className="event-modal calendar-export-modal">
+    <div
+      className="bz-overlay event-modal-overlay"
+      onClick={handleOverlayClick}
+    >
+      <div
+        className="bz-sheet event-modal calendar-export-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="calendar-export-title"
+      >
         <div className="event-modal-header">
           <div className="event-modal-title-section">
-            <Calendar size={20} className="calendar-export-title-icon" />
-            <h2 className="event-modal-title">Exporter le calendrier</h2>
+            <h2 className="event-modal-title" id="calendar-export-title">
+              S'abonner au calendrier
+            </h2>
           </div>
           <button
-            className="event-modal-close"
+            className="bz-close-button"
             onClick={onClose}
             aria-label="Fermer"
             type="button"
           >
-            <X size={20} strokeWidth={2} />
+            <X size={14} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className="event-modal-body">
+        <div className="event-modal-body bz-scroll">
           <p className="calendar-export-description">
-            Chaque groupe sélectionné reçoit un lien iCal distinct à importer
-            dans Google Calendar, Apple Calendar ou Outlook.
+            Copiez le lien d'un groupe et ajoutez-le comme abonnement dans
+            Calendrier, Google Agenda ou Outlook. Il se mettra à jour
+            automatiquement.
           </p>
           {renderContent()}
-        </div>
-
-        <div className="event-modal-footer">
-          <button
-            className="btn-modal-secondary"
-            onClick={onClose}
-            type="button"
-          >
-            Fermer
-          </button>
         </div>
       </div>
     </div>

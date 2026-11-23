@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import "./DayPicker.css";
 import { Calendar } from "lucide-react";
@@ -41,9 +41,40 @@ function translate(label, localeCode) {
   return enTranslations[label] || label;
 }
 
-export function MyDayPicker({ value, onChange, locale, mode = "single" }) {
+export function MyDayPicker({
+  value,
+  onChange,
+  locale,
+  mode = "single",
+  children,
+  triggerClassName = "btn-select-event",
+  triggerLabel,
+}) {
   const [opened, setOpened] = useState(false);
   const [hoveredWeek, setHoveredWeek] = useState(null);
+  const [displayMonth, setDisplayMonth] = useState(value || new Date());
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!opened) return undefined;
+    setDisplayMonth(value || new Date());
+
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpened(false);
+      }
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setOpened(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [opened]);
 
   const DayModePresets = [
     {
@@ -53,6 +84,17 @@ export function MyDayPicker({ value, onChange, locale, mode = "single" }) {
     {
       label: translate("Tomorrow", locale.code),
       getValue: () => subDays(new Date(), -1),
+    },
+  ];
+
+  const MonthModePresets = [
+    {
+      label: "Ce mois-ci",
+      getValue: () => new Date(),
+    },
+    {
+      label: "Le mois prochain",
+      getValue: () => subMonths(new Date(), -1),
     },
   ];
 
@@ -68,7 +110,12 @@ export function MyDayPicker({ value, onChange, locale, mode = "single" }) {
     },
   ];
 
-  const presets = mode === "week" ? WeekModePresets : DayModePresets;
+  const presets =
+    mode === "week"
+      ? WeekModePresets
+      : mode === "month"
+        ? MonthModePresets
+        : DayModePresets;
 
   const handlePresetClick = (preset) => {
     const date = preset.getValue();
@@ -150,59 +197,70 @@ export function MyDayPicker({ value, onChange, locale, mode = "single" }) {
         }
       : {};
 
-  const modifiersClassNames = {
-    selected: "rdp-day_selected-week",
-    hovered: "rdp-day_hovered-week",
-  };
+  const modifiersClassNames =
+    mode === "week"
+      ? {
+          selected: "rdp-day_selected-week",
+          hovered: "rdp-day_hovered-week",
+        }
+      : {};
 
   return (
-    <div className="day-picker-container">
-      <button onClick={() => setOpened(!opened)} className="btn-select-event">
-        <Calendar className="calendar-icon" />
-        <span className="day-picker-button-label">{formatDisplayDate()}</span>
+    <div className="day-picker-container" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setOpened(!opened)}
+        className={triggerClassName}
+        aria-haspopup="dialog"
+        aria-expanded={opened}
+        aria-label={triggerLabel}
+        title={triggerLabel}
+      >
+        {children || (
+          <>
+            <Calendar className="calendar-icon" />
+            <span className="day-picker-button-label">
+              {formatDisplayDate()}
+            </span>
+          </>
+        )}
       </button>
 
       {opened && (
-        <>
-          <div className="day-picker-overlay" onClick={() => setOpened(false)}>
-            <div
-              className="day-picker-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="day-picker-content">
-                {/* Presets à gauche */}
-                <div className="day-picker-presets">
-                  {presets.map((preset) => (
-                    <button
-                      key={preset.label}
-                      className="preset-button"
-                      onClick={() => handlePresetClick(preset)}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Calendrier à droite */}
-                <div className="day-picker-calendar">
-                  <DayPicker
-                    mode={"single"}
-                    selected={mode === "week" ? undefined : value}
-                    onSelect={handleSelect}
-                    locale={locale}
-                    weekStartsOn={1}
-                    showOutsideDays
-                    modifiers={modifiers}
-                    modifiersClassNames={modifiersClassNames}
-                    onDayMouseEnter={handleDayMouseEnter}
-                    onDayMouseLeave={handleDayMouseLeave}
-                    numberOfMonths={1}
-                  />
-                </div>
-              </div>
-            </div>
+        <div
+          className="bz-popover day-picker-popover"
+          role="dialog"
+          aria-label="Choisir une date"
+        >
+          <DayPicker
+            mode={"single"}
+            selected={mode === "week" ? undefined : value}
+            onSelect={handleSelect}
+            month={displayMonth}
+            onMonthChange={setDisplayMonth}
+            locale={locale}
+            weekStartsOn={1}
+            showOutsideDays
+            fixedWeeks
+            modifiers={modifiers}
+            modifiersClassNames={modifiersClassNames}
+            onDayMouseEnter={handleDayMouseEnter}
+            onDayMouseLeave={handleDayMouseLeave}
+            numberOfMonths={1}
+          />
+          <div className="day-picker-presets">
+            {presets.map((preset) => (
+              <button
+                type="button"
+                key={preset.label}
+                className="bz-button bz-button-secondary preset-button"
+                onClick={() => handlePresetClick(preset)}
+              >
+                {preset.label}
+              </button>
+            ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -1,0 +1,725 @@
+/*
+ * Better Zeus — design tokens
+ * Minimal, Apple-inspired system: neutral surfaces, hairline separators,
+ * one accent colour, system typography. No gradients.
+ */
+
+.bz-theme {
+  /* Typography */
+  --bz-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    "Segoe UI Variable Text", "Segoe UI", system-ui, "Helvetica Neue", Arial,
+    sans-serif;
+  --bz-font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "Inter", "Segoe UI Variable Display", "Segoe UI", system-ui,
+    "Helvetica Neue", Arial, sans-serif;
+  --bz-font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+    monospace;
+
+  /* Surfaces */
+  --bz-bg: #f6f6f8;
+  --bz-bg-sidebar: #ececef;
+  --bz-bg-elevated: #ffffff;
+  --bz-bg-grouped: #f1f1f4;
+  --bz-bg-subtle: rgba(0, 0, 0, 0.022);
+
+  /* Fills (controls, hovers) */
+  --bz-fill: rgba(120, 120, 128, 0.14);
+  --bz-fill-secondary: rgba(120, 120, 128, 0.1);
+  --bz-fill-hover: rgba(0, 0, 0, 0.05);
+  --bz-fill-active: rgba(0, 0, 0, 0.085);
+
+  /* Text */
+  --bz-label: #1d1d1f;
+  --bz-label-secondary: #66666b;
+  --bz-label-tertiary: #85858a;
+  --bz-label-quaternary: #bdbdc2;
+
+  /* Separators */
+  --bz-separator: rgba(0, 0, 0, 0.09);
+  --bz-separator-strong: rgba(0, 0, 0, 0.14);
+  --bz-grid-line: rgba(0, 0, 0, 0.065);
+
+  /* Accent & system colours */
+  --bz-accent: #0071e3;
+  --bz-accent-hover: #0077ed;
+  --bz-accent-pressed: #006edb;
+  --bz-accent-soft: rgba(0, 113, 227, 0.1);
+  --bz-on-accent: #ffffff;
+  --bz-red: #ff3b30;
+  --bz-red-soft: rgba(255, 59, 48, 0.1);
+  --bz-green: #34c759;
+  --bz-green-soft: rgba(52, 199, 89, 0.12);
+  --bz-orange: #ff9500;
+  --bz-orange-soft: rgba(255, 149, 0, 0.12);
+  --bz-today: #e0564c;
+
+  /* Inverted (primary black button) */
+  --bz-inverse: #1d1d1f;
+  --bz-inverse-hover: #333336;
+  --bz-on-inverse: #ffffff;
+
+  /* Elevation */
+  --bz-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --bz-shadow-popover: 0 0 0 0.5px rgba(0, 0, 0, 0.12),
+    0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --bz-shadow-modal: 0 0 0 0.5px rgba(0, 0, 0, 0.1),
+    0 24px 64px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --bz-overlay: rgba(0, 0, 0, 0.22);
+  --bz-material: rgba(252, 252, 253, 0.86);
+
+  /* Shape */
+  --bz-radius-xs: 5px;
+  --bz-radius-sm: 7px;
+  --bz-radius: 9px;
+  --bz-radius-lg: 12px;
+  --bz-radius-xl: 16px;
+
+  /* Motion */
+  --bz-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --bz-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Focus */
+  --bz-focus-ring: 0 0 0 3px rgba(0, 113, 227, 0.32);
+
+  color-scheme: light;
+  font-family: var(--bz-font);
+  color: var(--bz-label);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01";
+  letter-spacing: -0.005em;
+}
+
+.bz-theme[data-theme="dark"] {
+  --bz-bg: #1c1c1e;
+  --bz-bg-sidebar: #161618;
+  --bz-bg-elevated: #2c2c2e;
+  --bz-bg-grouped: #232325;
+  --bz-bg-subtle: rgba(255, 255, 255, 0.025);
+
+  --bz-fill: rgba(120, 120, 128, 0.24);
+  --bz-fill-secondary: rgba(120, 120, 128, 0.16);
+  --bz-fill-hover: rgba(255, 255, 255, 0.06);
+  --bz-fill-active: rgba(255, 255, 255, 0.1);
+
+  --bz-label: #f5f5f7;
+  --bz-label-secondary: #a1a1a6;
+  --bz-label-tertiary: #7c7c80;
+  --bz-label-quaternary: #48484a;
+
+  --bz-separator: rgba(255, 255, 255, 0.09);
+  --bz-separator-strong: rgba(255, 255, 255, 0.14);
+  --bz-grid-line: rgba(255, 255, 255, 0.06);
+
+  --bz-accent: #0a84ff;
+  --bz-accent-hover: #2491ff;
+  --bz-accent-pressed: #0077ed;
+  --bz-accent-soft: rgba(10, 132, 255, 0.18);
+  --bz-red: #ff453a;
+  --bz-red-soft: rgba(255, 69, 58, 0.16);
+  --bz-green: #30d158;
+  --bz-green-soft: rgba(48, 209, 88, 0.16);
+  --bz-orange: #ff9f0a;
+  --bz-orange-soft: rgba(255, 159, 10, 0.16);
+  --bz-today: #f0685f;
+
+  --bz-inverse: #f5f5f7;
+  --bz-inverse-hover: #ffffff;
+  --bz-on-inverse: #1d1d1f;
+
+  --bz-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --bz-shadow-popover: 0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 12px 32px rgba(0, 0, 0, 0.45);
+  --bz-shadow-modal: 0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 24px 64px rgba(0, 0, 0, 0.55);
+  --bz-overlay: rgba(0, 0, 0, 0.45);
+  --bz-material: rgba(44, 44, 46, 0.86);
+
+  --bz-focus-ring: 0 0 0 3px rgba(10, 132, 255, 0.45);
+
+  color-scheme: dark;
+}
+
+/* Base reset scoped to the extension so Zeus' own styles never leak in */
+.bz-theme,
+.bz-theme *,
+.bz-theme *::before,
+.bz-theme *::after {
+  box-sizing: border-box;
+}
+
+.bz-theme button,
+.bz-theme input,
+.bz-theme select,
+.bz-theme textarea {
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+.bz-theme button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bz-theme :focus {
+  outline: none;
+}
+
+.bz-theme :focus-visible {
+  outline: none;
+  box-shadow: var(--bz-focus-ring);
+}
+
+/* ---------- Shared primitives ---------- */
+
+/* Icon button: borderless, hover fill */
+.bz-icon-button {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  background: transparent;
+  color: var(--bz-label-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 0.15s var(--bz-ease),
+    color 0.15s var(--bz-ease);
+}
+
+.bz-icon-button:hover {
+  background: var(--bz-fill-hover);
+  color: var(--bz-label);
+}
+
+.bz-icon-button:active,
+.bz-icon-button.active {
+  background: var(--bz-fill-active);
+  color: var(--bz-label);
+}
+
+/* Push buttons */
+.bz-button {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 0.15s var(--bz-ease),
+    color 0.15s var(--bz-ease),
+    opacity 0.15s var(--bz-ease);
+}
+
+.bz-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.bz-button-primary {
+  background: var(--bz-accent);
+  color: var(--bz-on-accent);
+}
+
+.bz-button-primary:hover:not(:disabled) {
+  background: var(--bz-accent-hover);
+}
+
+.bz-button-primary:active:not(:disabled) {
+  background: var(--bz-accent-pressed);
+}
+
+.bz-button-secondary {
+  background: var(--bz-fill);
+  color: var(--bz-label);
+}
+
+.bz-button-secondary:hover:not(:disabled) {
+  background: var(--bz-fill-active);
+}
+
+.bz-button-plain {
+  background: transparent;
+  color: var(--bz-accent);
+  padding: 0 8px;
+}
+
+.bz-button-plain:hover:not(:disabled) {
+  background: var(--bz-accent-soft);
+}
+
+.bz-button-destructive {
+  background: transparent;
+  color: var(--bz-red);
+}
+
+.bz-button-destructive:hover:not(:disabled) {
+  background: var(--bz-red-soft);
+}
+
+/* Segmented control */
+.bz-segmented {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: stretch;
+  padding: 2px;
+  border-radius: var(--bz-radius);
+  background: var(--bz-fill);
+  isolation: isolate;
+}
+
+.bz-segmented-item {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  background: transparent;
+  color: var(--bz-label);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition:
+    background-color 0.2s var(--bz-ease),
+    box-shadow 0.2s var(--bz-ease),
+    color 0.2s var(--bz-ease);
+}
+
+.bz-segmented-item:hover:not(.active) {
+  color: var(--bz-label);
+  background: var(--bz-fill-hover);
+}
+
+.bz-segmented-item.active {
+  background: var(--bz-bg-elevated);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+.bz-theme[data-theme="dark"] .bz-segmented-item.active {
+  background: #636366;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* Search field */
+.bz-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  min-width: 0;
+  padding: 0 10px 0 30px;
+  border-radius: var(--bz-radius-sm);
+  background: var(--bz-fill-secondary);
+  color: var(--bz-label-tertiary);
+  transition:
+    background-color 0.15s var(--bz-ease),
+    box-shadow 0.15s var(--bz-ease);
+}
+
+.bz-search:focus-within {
+  background: var(--bz-bg-elevated);
+  box-shadow:
+    0 0 0 1px var(--bz-accent),
+    var(--bz-focus-ring);
+}
+
+.bz-search > svg {
+  position: absolute;
+  left: 10px;
+  pointer-events: none;
+}
+
+.bz-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--bz-label);
+  font-size: 13px;
+}
+
+.bz-search input::placeholder {
+  color: var(--bz-label-tertiary);
+}
+
+.bz-search input:focus-visible {
+  box-shadow: none;
+}
+
+.bz-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--bz-label-quaternary);
+  color: var(--bz-bg);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.bz-search-clear:hover {
+  background: var(--bz-label-tertiary);
+}
+
+/* Text input */
+.bz-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 11px;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  background: var(--bz-fill-secondary);
+  color: var(--bz-label);
+  font-size: 13px;
+  transition:
+    background-color 0.15s var(--bz-ease),
+    box-shadow 0.15s var(--bz-ease);
+}
+
+.bz-input::placeholder {
+  color: var(--bz-label-tertiary);
+}
+
+.bz-input:focus,
+.bz-input:focus-visible {
+  background: var(--bz-bg-elevated);
+  box-shadow:
+    0 0 0 1px var(--bz-accent),
+    var(--bz-focus-ring);
+}
+
+/* Popover surface (menus, pickers) */
+.bz-popover {
+  background: var(--bz-material);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+  border-radius: var(--bz-radius-lg);
+  box-shadow: var(--bz-shadow-popover);
+  color: var(--bz-label);
+  animation: bz-pop-in 0.16s var(--bz-ease-out);
+  transform-origin: top right;
+}
+
+@keyframes bz-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Menu rows */
+.bz-menu {
+  padding: 5px;
+}
+
+.bz-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: none;
+  border-radius: var(--bz-radius-xs);
+  background: transparent;
+  color: var(--bz-label);
+  font-size: 13px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.bz-menu-item > svg {
+  flex: 0 0 auto;
+  color: var(--bz-label-secondary);
+}
+
+.bz-menu-item:hover {
+  background: var(--bz-accent);
+  color: #ffffff;
+}
+
+.bz-menu-item:hover > svg,
+.bz-menu-item:hover .bz-menu-shortcut {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.bz-menu-item.destructive {
+  color: var(--bz-red);
+}
+
+.bz-menu-item.destructive > svg {
+  color: var(--bz-red);
+}
+
+.bz-menu-item.destructive:hover {
+  background: var(--bz-red);
+  color: #ffffff;
+}
+
+.bz-menu-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bz-menu-shortcut {
+  color: var(--bz-label-tertiary);
+  font-size: 12px;
+}
+
+.bz-menu-separator {
+  height: 1px;
+  margin: 5px 9px;
+  background: var(--bz-separator);
+}
+
+.bz-menu-heading {
+  padding: 6px 9px 4px;
+  color: var(--bz-label-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Modal sheet */
+.bz-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bz-overlay);
+  animation: bz-fade-in 0.18s var(--bz-ease);
+}
+
+.bz-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: min(86vh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--bz-radius-xl);
+  background: var(--bz-bg-elevated);
+  box-shadow: var(--bz-shadow-modal);
+  color: var(--bz-label);
+  animation: bz-sheet-in 0.24s var(--bz-ease-out);
+}
+
+@keyframes bz-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bz-sheet-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bz-close-button {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--bz-fill);
+  color: var(--bz-label-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s var(--bz-ease);
+}
+
+.bz-close-button:hover {
+  background: var(--bz-fill-active);
+  color: var(--bz-label);
+}
+
+/* Switch (iOS style) */
+.bz-switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--bz-fill);
+  transition: background-color 0.2s var(--bz-ease);
+}
+
+.bz-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.18),
+    0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  transition: transform 0.22s var(--bz-ease-out);
+}
+
+.bz-switch.on {
+  background: var(--bz-green);
+}
+
+.bz-switch.on::after {
+  transform: translateX(16px);
+}
+
+/* Inset grouped list */
+.bz-group {
+  border-radius: var(--bz-radius-lg);
+  background: var(--bz-bg-grouped);
+  overflow: hidden;
+}
+
+.bz-group-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 14px;
+}
+
+.bz-group-row + .bz-group-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 0;
+  height: 1px;
+  background: var(--bz-separator);
+}
+
+.bz-group-title {
+  margin: 0 0 6px 14px;
+  color: var(--bz-label-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Spinner (activity indicator) */
+.bz-spinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 2px solid var(--bz-fill);
+  border-top-color: var(--bz-label-secondary);
+  animation: bz-spin 0.8s linear infinite;
+}
+
+@keyframes bz-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Scrollbars */
+.bz-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bz-label-quaternary) transparent;
+}
+
+.bz-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.bz-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bz-scroll::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background: var(--bz-label-quaternary);
+  background-clip: padding-box;
+}
+
+.bz-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--bz-label-tertiary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bz-theme *,
+  .bz-theme *::before,
+  .bz-theme *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Brand mark tile */
+.bz-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--bz-inverse);
+  color: var(--bz-on-inverse);
+}
+
+.bz-brand-mark svg {
+  width: 62%;
+  height: 62%;
+}

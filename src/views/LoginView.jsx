@@ -1,120 +1,167 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import "../styles/theme.css";
 import "./LoginView.css";
+import BrandMark from "../components/BrandMark";
+
+const getInitialTheme = () => {
+  try {
+    const saved = localStorage.getItem("better-zeus-theme");
+    if (saved === "light" || saved === "dark") return saved;
+  } catch {
+    // ignore storage errors
+  }
+  return window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+};
+
+// Zeus renders its Office 365 button asynchronously: look it up on demand.
+const findOfficeButton = () => {
+  const candidates = document.querySelectorAll("button, a");
+  for (const element of candidates) {
+    if (element.closest(".login-view")) continue;
+    const image = element.querySelector("img");
+    const source = image?.getAttribute("src") || "";
+    const label = `${element.textContent || ""} ${image?.alt || ""}`;
+    if (/office|microsoft/i.test(source) || /office|microsoft/i.test(label)) {
+      return element;
+    }
+  }
+  return null;
+};
+
+const MicrosoftLogo = () => (
+  <svg
+    className="microsoft-icon"
+    viewBox="0 0 23 23"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path d="M0 0H11V11H0V0Z" fill="#F25022" />
+    <path d="M12 0H23V11H12V0Z" fill="#7FBA00" />
+    <path d="M0 12H11V23H0V12Z" fill="#00A4EF" />
+    <path d="M12 12H23V23H12V12Z" fill="#FFB900" />
+  </svg>
+);
 
 const LoginView = () => {
-  const [welcomeTitle, setWelcomeTitle] = useState("Welcome Back");
-  const [welcomeSubtitle, setWelcomeSubtitle] = useState(
-    "Connectez-vous pour utiliser Better Zeus",
-  );
-  const [officeButton, setOfficeButton] = useState(null);
+  const [theme] = useState(getInitialTheme);
+  const [status, setStatus] = useState("idle"); // idle | connecting | unavailable
+  const [isHidden, setIsHidden] = useState(false);
+  const pollRef = useRef(null);
 
-  useEffect(() => {
-    // Find the text of the title on the page
-    // as Zeus is slow (we are faster), we have to try to get the text multiple time
-    // (thats why this code looks BAD)
-
-    let attempts = 0;
-    const maxAttempts = 10;
-    const interval = setInterval(() => {
-      if (attempts >= maxAttempts) {
-        clearInterval(interval);
-        return;
-      }
-
-      const h1 = document.querySelector("h1");
-      const h3 = document.querySelector("h3");
-
-      if (h1 && h1.textContent) {
-        setWelcomeTitle(h1.textContent);
-      }
-
-      if (h3 && h3.textContent) {
-        setWelcomeSubtitle(h3.textContent);
-      }
-
-      attempts++;
-    }, 50);
-
-    // Find the Office 365 login button
-    const findOfficeButton = () => {
-      const buttons = document.querySelectorAll("button, a");
-      for (const btn of buttons) {
-        const imgInside = btn.querySelector("img");
-        if (imgInside.src.includes("office")) return btn;
-      }
-      return null;
-    };
-
-    const button = findOfficeButton();
-    if (button) {
-      setOfficeButton(button);
-    }
-  }, []);
+  useEffect(() => () => clearInterval(pollRef.current), []);
 
   const handleOfficeLogin = () => {
-    if (officeButton) {
-      officeButton.click();
+    if (status === "connecting") return;
+    setStatus("connecting");
+
+    const immediate = findOfficeButton();
+    if (immediate) {
+      immediate.click();
+      return;
     }
+
+    // Zeus may still be booting: wait for its button for a few seconds
+    let attempts = 0;
+    clearInterval(pollRef.current);
+    pollRef.current = setInterval(() => {
+      attempts += 1;
+      const button = findOfficeButton();
+      if (button) {
+        clearInterval(pollRef.current);
+        button.click();
+      } else if (attempts >= 30) {
+        clearInterval(pollRef.current);
+        setStatus("unavailable");
+      }
+    }, 100);
   };
 
+  const showOriginalPage = () => {
+    const zeusRoot = document.querySelector("zeus-root");
+    if (zeusRoot) zeusRoot.style.display = "";
+    const mainContent = document.querySelector("main");
+    if (mainContent) mainContent.style.display = "";
+    setIsHidden(true);
+  };
+
+  if (isHidden) return null;
+
   return (
-    <div className="login-view">
-      <div className="login-container">
-        <div className="login-header">
-          <div className="logo-container">
-            <svg
-              class="logo-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              width="50%"
-              height="50%"
-              viewBox="0 0 24 24"
-              fill="none"
+    <div className="login-view bz-theme" data-theme={theme}>
+      <main className="login-container">
+        <BrandMark className="login-mark" />
+
+        <h1 className="login-title">Better Zeus</h1>
+        <p className="login-subtitle">
+          Enfin un emploi du temps <strong style={{color: "#f0685f"}}>stylé</strong>
+        </p>
+
+        <button
+          type="button"
+          className="office-login-button"
+          onClick={handleOfficeLogin}
+          disabled={status === "connecting"}
+          aria-busy={status === "connecting"}
+        >
+          {status === "connecting" ? (
+            <>
+              <span className="login-spinner" aria-hidden="true" />
+              Redirection vers Microsoft…
+            </>
+          ) : (
+            <>
+              <MicrosoftLogo />
+              Se connecter avec Microsoft
+            </>
+          )}
+        </button>
+
+        {status === "unavailable" ? (
+          <p className="login-notice" role="alert">
+            La connexion Zeus n'a pas répondu.{" "}
+            <button
+              type="button"
+              className="login-link"
+              onClick={() => {
+                setStatus("idle");
+                handleOfficeLogin();
+              }}
             >
-              <path
-                d="M9.31994 13.2814H12.4099V20.4814C12.4099 21.5414 13.7299 22.0414 14.4299 21.2414L21.9999 12.6414C22.6599 11.8914 22.1299 10.7214 21.1299 10.7214H18.0399V3.52143C18.0399 2.46143 16.7199 1.96143 16.0199 2.76143L8.44994 11.3614C7.79994 12.1114 8.32994 13.2814 9.31994 13.2814Z"
-                fill="currentColor"
-              />
-              <path
-                d="M8.5 4.75H1.5C1.09 4.75 0.75 4.41 0.75 4C0.75 3.59 1.09 3.25 1.5 3.25H8.5C8.91 3.25 9.25 3.59 9.25 4C9.25 4.41 8.91 4.75 8.5 4.75Z"
-                fill="currentColor"
-              />
-              <path
-                d="M7.5 20.75H1.5C1.09 20.75 0.75 20.41 0.75 20C0.75 19.59 1.09 19.25 1.5 19.25H7.5C7.91 19.25 8.25 19.59 8.25 20C8.25 20.41 7.91 20.75 7.5 20.75Z"
-                fill="currentColor"
-              />
-              <path
-                d="M4.5 12.75H1.5C1.09 12.75 0.75 12.41 0.75 12C0.75 11.59 1.09 11.25 1.5 11.25H4.5C4.91 11.25 5.25 11.59 5.25 12C5.25 12.41 4.91 12.75 4.5 12.75Z"
-                fill="currentColor"
-              />
-            </svg>
-            <span className="logo-text">Better Zeus</span>
-          </div>
-        </div>
-
-        <div className="login-content">
-          <h1 className="login-title">{welcomeTitle}</h1>
-          <p className="login-subtitle">{welcomeSubtitle}</p>
-
-          <button className="office-login-button" onClick={handleOfficeLogin}>
-            <svg
-              className="microsoft-icon"
-              viewBox="0 0 23 23"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+              Réessayer
+            </button>{" "}
+            ou{" "}
+            <button
+              type="button"
+              className="login-link"
+              onClick={showOriginalPage}
             >
-              <path d="M0 0H11V11H0V0Z" fill="#F25022" />
-              <path d="M12 0H23V11H12V0Z" fill="#7FBA00" />
-              <path d="M0 12H11V23H0V12Z" fill="#00A4EF" />
-              <path d="M12 12H23V23H12V12Z" fill="#FFB900" />
-            </svg>
-            Se connecter avec Microsoft
-          </button>
+              afficher la page Zeus
+            </button>
+            .
+          </p>
+        ) : (
+          <p className="login-hint">
+            Better Zeus n'a jamais accès à votre mot de passe.
+          </p>
+        )}
+      </main>
 
-          <div className="login-footer">
-            <p className="footer-text">Enhanced calendar experience for Zeus</p>
-          </div>
-        </div>
-      </div>
+      <footer className="login-footer">
+        <a
+          href="https://github.com/Axthauvin/better-zeus"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Projet open source
+        </a>
+        <span aria-hidden="true">·</span>
+        <button type="button" className="login-link" onClick={showOriginalPage}>
+          Page Zeus d'origine
+        </button>
+      </footer>
     </div>
   );
 };

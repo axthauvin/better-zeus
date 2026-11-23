@@ -15,6 +15,7 @@ import { fr } from "date-fns/locale";
 import BaseCalendarLayout from "./BaseCalendarLayout";
 import { getEventsForDay, getEventStyle } from "../utils/calendarHelpers";
 import "../components/MonthCalendar.css";
+import { getRangeTitle } from "../utils/formatTitle";
 import { useAttendance } from "../context/AttendanceContext";
 
 const MonthView = ({
@@ -114,7 +115,7 @@ const MonthView = ({
 
   const isToday = (day) => isSameDay(day, new Date());
 
-  const headerTitle = format(currentDate, "MMMM yyyy", { locale: fr });
+  const title = getRangeTitle(currentDate, currentDate);
 
   // Create an array of 7 days just for the headers (Mon-Sun)
   const weekDayHeaders = eachDayOfInterval({
@@ -131,8 +132,9 @@ const MonthView = ({
       onNext={handleNext}
       onToday={handleToday}
       onDateChange={handleDateChange}
-      headerTitle={headerTitle}
-      events={events}
+      titleStrong={title.strong}
+      titleLight={title.light}
+      loading={loading}
       selectedEvent={selectedEvent}
       onCloseModal={handleCloseModal}
       eventSearchQuery={eventSearchQuery}
@@ -154,7 +156,12 @@ const MonthView = ({
         <div className="month-day-headers">
           {weekDayHeaders.map((day, i) => (
             <div key={i} className="month-day-header">
-              {format(day, "EEEE", { locale: fr })}
+              <span className="month-day-header-long">
+                {format(day, "EEEE", { locale: fr })}
+              </span>
+              <span className="month-day-header-short">
+                {format(day, "EEE", { locale: fr })}
+              </span>
             </div>
           ))}
         </div>
@@ -162,7 +169,9 @@ const MonthView = ({
         {/* Month grid */}
         <div className="month-grid">
           {monthDays.map((day, i) => {
-            const dayEvents = getEventsForDay(events, day);
+            const dayEvents = [...getEventsForDay(events, day)].sort(
+              (a, b) => a.start - b.start,
+            );
             const isCurrentMonth = isSameMonth(day, currentDate);
             const today = isToday(day);
 
@@ -171,12 +180,13 @@ const MonthView = ({
                 key={i}
                 className={`month-cell ${isCurrentMonth ? "" : "out-of-month"} ${today ? "today-cell" : ""}`}
                 onClick={() => handleCellClick(day)}
-                style={{ cursor: "pointer" }}
-                title={`Ajouter un événement le ${format(day, "d MMMM", { locale: fr })}`}
+                title={`Nouvel événement le ${format(day, "d MMMM", { locale: fr })}`}
               >
                 <div className="month-cell-header">
                   <span className={`month-day-number ${today ? "today" : ""}`}>
-                    {format(day, "d")}
+                    {format(day, "d") === "1" && !today
+                      ? format(day, "d MMM", { locale: fr })
+                      : format(day, "d")}
                   </span>
                 </div>
 
@@ -190,32 +200,24 @@ const MonthView = ({
                         key={event.id}
                         className={`month-event ${event.isCustom ? "custom-event" : ""} ${missed ? "missed" : ""} ${ignored ? "ignored" : ""}`}
                         style={{
-                          backgroundColor: style.bg,
-                          borderLeftColor: style.border,
-                          color: style.text,
+                          "--event-color": style.border,
+                          opacity: ignored ? 0.4 : missed ? 0.6 : 1,
                         }}
                         onClick={(e) => handleEventClick(event, e)}
-                        title={event.title}
+                        title={`${format(event.start, "HH:mm")} ${event.title}`}
                       >
-                        <span
-                          className="month-event-time"
-                          style={{
-                            textDecoration: missed ? "line-through" : "none",
-                            fontStyle: ignored ? "italic" : "normal",
-                            opacity: ignored ? 0.4 : missed ? 0.6 : 1,
-                          }}
-                        >
-                          {format(event.start, "HH:mm")}
-                        </span>
+                        <span className="month-event-dot" aria-hidden="true" />
                         <span
                           className="month-event-title"
                           style={{
                             textDecoration: missed ? "line-through" : "none",
                             fontStyle: ignored ? "italic" : "normal",
-                            opacity: ignored ? 0.4 : missed ? 0.6 : 1,
                           }}
                         >
                           {event.title}
+                        </span>
+                        <span className="month-event-time">
+                          {format(event.start, "HH:mm")}
                         </span>
                       </div>
                     );

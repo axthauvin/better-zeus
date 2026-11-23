@@ -7,6 +7,53 @@ export const CALENDAR_CONFIG = {
 
 // Event color mapping with pastel backgrounds and borders
 export const EVENT_COLOR_MAP = {
+  // Apple system palette (used by course types)
+  "#AF52DE": {
+    bg: "rgba(175, 82, 222, 0.12)",
+    border: "#AF52DE",
+    text: "#8936B5",
+  },
+  "#007AFF": {
+    bg: "rgba(0, 122, 255, 0.12)",
+    border: "#007AFF",
+    text: "#0058BD",
+  },
+  "#30B0C7": {
+    bg: "rgba(48, 176, 199, 0.12)",
+    border: "#30B0C7",
+    text: "#167F92",
+  },
+  "#34C759": {
+    bg: "rgba(52, 199, 89, 0.12)",
+    border: "#34C759",
+    text: "#1F8A3B",
+  },
+  "#FF2D55": {
+    bg: "rgba(255, 45, 85, 0.12)",
+    border: "#FF2D55",
+    text: "#C41A3D",
+  },
+  "#FF9500": {
+    bg: "rgba(255, 149, 0, 0.12)",
+    border: "#FF9500",
+    text: "#B06700",
+  },
+  "#FF3B30": {
+    bg: "rgba(255, 59, 48, 0.12)",
+    border: "#FF3B30",
+    text: "#C8261C",
+  },
+  "#5856D6": {
+    bg: "rgba(88, 86, 214, 0.12)",
+    border: "#5856D6",
+    text: "#3F3DB2",
+  },
+  "#FFCC00": {
+    bg: "rgba(255, 204, 0, 0.16)",
+    border: "#FFCC00",
+    text: "#8A6A00",
+  },
+  // Legacy palette (kept for custom events saved with older colours)
   "#7C3AED": {
     bg: "rgba(124, 58, 237, 0.12)",
     border: "#7C3AED",
@@ -71,7 +118,7 @@ export const EVENT_COLOR_MAP = {
 
 // Default color style
 export const DEFAULT_EVENT_STYLE = {
-  bg: "rgba(124, 58, 237, 0.12)",
-  border: "#7C3AED",
-  text: "#5B21B6",
+  bg: "rgba(175, 82, 222, 0.12)",
+  border: "#AF52DE",
+  text: "#8936B5",
 };

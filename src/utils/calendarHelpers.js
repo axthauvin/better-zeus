@@ -218,6 +218,18 @@ export const formatHour = (hour) => {
  * Format enum to display string (e.g. "CourseType.Lecture" => "Lecture")
  */
 
+const EVENT_TYPE_LABELS = {
+  Lecture: "Cours magistral",
+  Practice: "Travaux pratiques",
+  Conference: "Conférence",
+  Workshop: "Atelier",
+  TD: "Travaux dirigés",
+  Permanence: "Permanence",
+  Exam: "Examen",
+  FollowUp: "Suivi",
+};
+
 export function eventTypeDisplay(type) {
-  return type.replace("CourseType.", "");
+  const key = String(type || "").replace("CourseType.", "");
+  return EVENT_TYPE_LABELS[key] || key;
 }

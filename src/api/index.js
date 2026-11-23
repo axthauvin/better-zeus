@@ -229,17 +229,17 @@ export function buildCalendarExportLink(groupId, token) {
 
 function getColorForEventType(type) {
   const typeColors = {
-    "CourseType.Lecture": "#7C3AED",
-    "CourseType.Practice": "#3B82F6",
-    "CourseType.Conference": "#14B8A6",
-    "CourseType.Workshop": "#10B981",
-    "CourseType.TD": "#EC4899",
-    "CourseType.Permanence": "#F59E0B",
-    "CourseType.Exam": "#EF4444",
-    "CourseType.FollowUp": "#5cf1f6",
+    "CourseType.Lecture": "#AF52DE",
+    "CourseType.Practice": "#007AFF",
+    "CourseType.Conference": "#30B0C7",
+    "CourseType.Workshop": "#34C759",
+    "CourseType.TD": "#FF2D55",
+    "CourseType.Permanence": "#FF9500",
+    "CourseType.Exam": "#FF3B30",
+    "CourseType.FollowUp": "#5856D6",
   };
 
-  return typeColors[type] || "#7C3AED";
+  return typeColors[type] || "#AF52DE";
 }
 
 // Transform API data to calendar events
@@ -320,14 +320,15 @@ export function getUserGroups() {
             group.name !== "0"
               ? path
                 ? `${path}/${group.name}`
-                : group.name
+                : String(group.name)
               : path,
           ),
         );
       }
     }
 
-    groups.values.forEach(traverse);
+    // Don't pass forEach's index as the initial path
+    groups.values.forEach((group) => traverse(group));
 
     return allGroups;
   } catch (error) {

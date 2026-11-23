@@ -24,6 +24,7 @@ import {
   formatHour,
 } from "../utils/calendarHelpers";
 import { CALENDAR_CONFIG } from "../utils/calendarConstants";
+import { getRangeTitle } from "../utils/formatTitle";
 import "../components/WeekCalendar.css";
 
 const INITIAL_SCROLL_HOUR = 6;
@@ -127,16 +128,9 @@ const WeekView = ({
   };
 
   // Header configuration
-  const headerTitle = format(currentDate, "MMMM yyyy", { locale: fr });
-  const headerSubtitle = (
-    <>
-      Week {getWeekNumber()}
-      <p className="week-range">
-        {format(weekStart, "d MMM yyyy", { locale: fr })} –{" "}
-        {format(weekEnd, "d MMM yyyy", { locale: fr })}
-      </p>
-    </>
-  );
+  const title = getRangeTitle(weekStart, weekEnd);
+  const headerSubtitle = `Semaine ${getWeekNumber()} · ${format(weekStart, "d", { locale: fr })} – ${format(weekEnd, "d MMM", { locale: fr })}`;
+  const isWeekend = (day) => day.getDay() === 0 || day.getDay() === 6;
 
   return (
     <BaseCalendarLayout
@@ -147,9 +141,10 @@ const WeekView = ({
       onNext={handleNext}
       onToday={handleToday}
       onDateChange={handleDateChange}
-      headerTitle={headerTitle}
-      headerSubtitle={headerSubtitle}
-      events={events}
+      titleStrong={title.strong}
+      titleLight={title.light}
+      subtitle={headerSubtitle}
+      loading={loading}
       selectedEvent={selectedEvent}
       onCloseModal={handleCloseModal}
       eventSearchQuery={eventSearchQuery}
@@ -185,15 +180,12 @@ const WeekView = ({
             {weekDays.map((day, index) => (
               <div
                 key={index}
-                className={`day-header ${isToday(day) ? "today" : ""}`}
+                className={`day-header ${isToday(day) ? "today" : ""} ${isWeekend(day) ? "weekend" : ""}`}
               >
-                <span className="day-name">
-                  {format(day, "EEE", { locale: fr })}{" "}
-                  {!isToday(day) && format(day, "d")}
+                <span className="day-header-weekday">
+                  {format(day, "EEE", { locale: fr })}
                 </span>
-                {isToday(day) && (
-                  <span className="today-badge">{format(day, "d")}</span>
-                )}
+                <span className="day-header-date">{format(day, "d")}</span>
               </div>
             ))}
           </div>
@@ -205,10 +197,9 @@ const WeekView = ({
                 {weekDays.map((day, dayIndex) => (
                   <div
                     key={dayIndex}
-                    className="hour-cell"
+                    className={`hour-cell ${isWeekend(day) ? "weekend" : ""}`}
                     onClick={() => handleSlotClick(day, hour)}
-                    style={{ cursor: "pointer" }}
-                    title={`Ajouter un événement à ${formatHour(hour)}`}
+                    title={`Nouvel événement à ${formatHour(hour)}`}
                   ></div>
                 ))}
               </div>
