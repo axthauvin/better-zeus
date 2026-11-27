@@ -41,6 +41,7 @@ const DayView = ({
   onOpenCalendarExport,
   onCreateEvent,
   onDeleteEvent,
+  onOpenRoomSchedule,
   onOpenCreateModal,
   createModalState,
   onCloseCreateModal,
@@ -144,6 +145,7 @@ const DayView = ({
       exportEvents={exportEvents}
       onCreateEvent={onCreateEvent}
       onDeleteEvent={onDeleteEvent}
+      onOpenRoomSchedule={onOpenRoomSchedule}
       onOpenCreateModal={onOpenCreateModal}
       createModalState={createModalState}
       onCloseCreateModal={onCloseCreateModal}

@@ -64,6 +64,7 @@ const BaseCalendarLayout = ({
   onCloseModal,
   onCreateEvent,
   onDeleteEvent,
+  onOpenRoomSchedule,
   onOpenCreateModal,
   createModalState,
   onCloseCreateModal,
@@ -308,6 +309,14 @@ const BaseCalendarLayout = ({
           event={selectedEvent}
           onClose={onCloseModal}
           onDelete={onDeleteEvent}
+          onOpenRoomSchedule={
+            onOpenRoomSchedule
+              ? (roomName) => {
+                  onOpenRoomSchedule(roomName);
+                  onCloseModal();
+                }
+              : undefined
+          }
         />
       )}
 

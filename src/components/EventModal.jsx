@@ -11,13 +11,14 @@ import {
   ArrowUpRight,
   MessageSquare,
   AlignLeft,
+  CalendarDays,
 } from "lucide-react";
 import { useAttendance } from "../context/AttendanceContext";
 import "./EventModal.css";
 import { eventTypeDisplay } from "../utils/calendarHelpers";
 import { fetchReservationDetails } from "../api";
 
-const EventModal = ({ event, onClose, onDelete }) => {
+const EventModal = ({ event, onClose, onDelete, onOpenRoomSchedule }) => {
   const {
     isEventMissed,
     isEventIgnored,
@@ -57,6 +58,10 @@ const EventModal = ({ event, onClose, onDelete }) => {
   }, [onClose]);
 
   if (!event) return null;
+
+  const roomNames = Array.from(
+    new Set((event.rooms || []).map((room) => room?.name).filter(Boolean)),
+  );
 
   const missed = isEventMissed(event.id);
   const ignored = isEventIgnored(event);
@@ -197,6 +202,23 @@ const EventModal = ({ event, onClose, onDelete }) => {
                 <MapPin size={16} className="event-info-icon" />
                 <div className="event-info-content">
                   <div className="event-info-value">{event.location}</div>
+                  {onOpenRoomSchedule && roomNames.length > 0 && (
+                    <div className="event-room-actions">
+                      {roomNames.map((roomName) => (
+                        <button
+                          type="button"
+                          key={roomName}
+                          className="event-room-schedule-button"
+                          onClick={() => onOpenRoomSchedule(roomName)}
+                        >
+                          <CalendarDays size={13} strokeWidth={2} />
+                          {roomNames.length > 1
+                            ? `Planning de ${roomName}`
+                            : "Voir le planning de la salle"}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -255,6 +255,16 @@ const CalendarContainer = () => {
     setEvents([]);
   };
 
+  // Bascule sur le mode « Salles » avec la salle du cours présélectionnée
+  const handleOpenRoomSchedule = (roomName) => {
+    if (!roomName) return;
+    if (selectionMode !== "rooms") {
+      handleSelectionModeChange("rooms");
+    }
+    setSelectedRooms([roomName]);
+    setEventSearchQuery("");
+  };
+
   const allCombinedEvents = React.useMemo(() => {
     return [...events, ...customEvents];
   }, [events, customEvents]);
@@ -424,6 +434,7 @@ const CalendarContainer = () => {
             onOpenCalendarExport={() => setIsCalendarExportOpen(true)}
             onCreateEvent={handleCreateCustomEvent}
             onDeleteEvent={handleDeleteCustomEvent}
+            onOpenRoomSchedule={handleOpenRoomSchedule}
             onOpenCreateModal={handleOpenCreateModal}
             createModalState={createModalState}
             onCloseCreateModal={handleCloseCreateModal}
@@ -445,6 +456,7 @@ const CalendarContainer = () => {
             onOpenCalendarExport={() => setIsCalendarExportOpen(true)}
             onCreateEvent={handleCreateCustomEvent}
             onDeleteEvent={handleDeleteCustomEvent}
+            onOpenRoomSchedule={handleOpenRoomSchedule}
             onOpenCreateModal={handleOpenCreateModal}
             createModalState={createModalState}
             onCloseCreateModal={handleCloseCreateModal}
@@ -466,6 +478,7 @@ const CalendarContainer = () => {
             onOpenCalendarExport={() => setIsCalendarExportOpen(true)}
             onCreateEvent={handleCreateCustomEvent}
             onDeleteEvent={handleDeleteCustomEvent}
+            onOpenRoomSchedule={handleOpenRoomSchedule}
             onOpenCreateModal={handleOpenCreateModal}
             createModalState={createModalState}
             onCloseCreateModal={handleCloseCreateModal}

@@ -164,6 +164,34 @@
   text-decoration: underline;
 }
 
+/* Room schedule shortcut */
+.event-room-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.event-room-schedule-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--bz-radius-sm);
+  background: var(--bz-accent-soft);
+  color: var(--bz-accent);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter 0.12s var(--bz-ease);
+}
+
+.event-room-schedule-button:hover {
+  filter: brightness(0.95);
+}
+
 /* Attendance switches */
 .attendance-actions {
   margin-top: 22px;
