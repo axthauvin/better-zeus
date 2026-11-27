@@ -327,7 +327,7 @@ const GroupSelector = ({
                       className={`sidebar-check ${item.enabled ? "checked" : ""}`}
                       aria-hidden="true"
                     >
-                      {item.enabled && <Check size={11} strokeWidth={3.5} />}
+                      {item.enabled && <Check size={12} strokeWidth={3.5} />}
                     </span>
                     <span className="sidebar-row-label">{item.label}</span>
                   </button>

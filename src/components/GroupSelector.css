@@ -203,6 +203,21 @@
 
 .sidebar-row.disabled .sidebar-row-label {
   color: var(--bz-label-secondary);
+  text-decoration: line-through;
+}
+
+/* "Mes groupes" rows: a bit larger than the catalogue below */
+.sidebar-row.selected .sidebar-row-main {
+  gap: 10px;
+  min-height: 36px;
+  padding: 7px 8px;
+  font-size: 14px;
+}
+
+.sidebar-row.selected .sidebar-check {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
 }
 
 /* Accessories (revealed on hover) */
