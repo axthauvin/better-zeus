@@ -1,4 +1,5 @@
 import path from "path";
+import webpack from "webpack";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,6 +33,12 @@ export default {
       },
     ],
   },
+  plugins: [
+    // Content scripts can't load extra chunks: keep dynamic imports inside the
+    // single bundle. They still run lazily, so only the selected interface's
+    // CSS gets injected (see src/index.jsx).
+    new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
+  ],
   resolve: {
     extensions: [".js", ".jsx"],
   },

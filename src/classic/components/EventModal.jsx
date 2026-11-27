@@ -1,0 +1,318 @@
+// ANCIENNE INTERFACE — NON MAINTENUE. Conservée uniquement pour la compatibilité
+// (voir src/classic/README.md). Ne pas y ajouter de fonctionnalités : développer dans src/components/.
+
+import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import {
+  X,
+  Clock,
+  MapPin,
+  User,
+  Tag,
+  Users,
+  UserX,
+  CheckCircle2,
+  Video,
+  ExternalLink,
+  MessageSquare,
+  Trash2,
+} from "lucide-react";
+import { useAttendance } from "../../context/AttendanceContext";
+import "./EventModal.css";
+import { eventTypeDisplay } from "../../utils/calendarHelpers";
+import { fetchReservationDetails } from "../../api";
+
+const EventModal = ({ event, onClose, onDelete }) => {
+  const {
+    isEventMissed,
+    isEventIgnored,
+    isNonCountableEvent,
+    toggleMissedEvent,
+    toggleIgnoredEvent,
+    toggleNonCountableEvent,
+  } = useAttendance();
+
+  const [details, setDetails] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
+  useEffect(() => {
+    const getDetails = async () => {
+      if (event && event.id && !event.isCustom) {
+        setLoadingDetails(true);
+        try {
+          const data = await fetchReservationDetails(event.id);
+          setDetails(data);
+        } catch (error) {
+          console.error("Failed to fetch event details:", error);
+        } finally {
+          setLoadingDetails(false);
+        }
+      }
+    };
+
+    getDetails();
+  }, [event?.id, event?.isCustom]);
+
+  if (!event) return null;
+
+  const missed = isEventMissed(event.id);
+  const ignored = isEventIgnored(event);
+  const nonCountable = isNonCountableEvent(event);
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const duration = () => {
+    const diff = event.end - event.start;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0 && minutes > 0) {
+      return `${hours}h ${minutes}min`;
+    } else if (hours > 0) {
+      return `${hours}h`;
+    } else {
+      return `${minutes}min`;
+    }
+  };
+
+  const renderTextWithLinks = (text) => {
+    if (!text) return null;
+    // Regex to find URLs starting with http or https
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, i) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="online-link"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
+  return (
+    <div className="event-modal-overlay" onClick={handleOverlayClick}>
+      <div className="event-modal">
+        <div className="event-modal-header">
+          <div className="event-modal-title-section">
+            <div
+              className="event-color-indicator"
+              style={{ backgroundColor: event.color }}
+            ></div>
+            <div>
+              {event.isCustom && (
+                <div className="event-custom-badge-wrapper">
+                  <span className="event-custom-badge">
+                    Événement personnalisé
+                  </span>
+                </div>
+              )}
+              <h2 className="event-modal-title">
+                {event.title}
+                {details?.code && ` (${details.code})`}
+              </h2>
+            </div>
+          </div>
+          <button
+            className="event-modal-close"
+            onClick={onClose}
+            aria-label="Fermer"
+          >
+            <X size={20} strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="event-modal-body">
+          <div className="event-info-item">
+            <Clock size={18} className="event-info-icon" />
+            <div className="event-info-content">
+              <div className="event-info-label">Date et heure</div>
+              <div className="event-info-value">
+                {format(event.start, "EEEE d MMMM yyyy", { locale: fr })}
+              </div>
+              <div className="event-info-time">
+                {format(event.start, "HH:mm")} - {format(event.end, "HH:mm")} (
+                {duration()})
+              </div>
+            </div>
+          </div>
+
+          {event.location && (
+            <div className="event-info-item">
+              <MapPin size={18} className="event-info-icon" />
+              <div className="event-info-content">
+                <div className="event-info-label">Lieu</div>
+                <div className="event-info-value">{event.location}</div>
+              </div>
+            </div>
+          )}
+
+          {event.teacher && (
+            <div className="event-info-item">
+              <User size={18} className="event-info-icon" />
+              <div className="event-info-content">
+                <div className="event-info-label">Enseignant</div>
+                <div className="event-info-value">{event.teacher}</div>
+              </div>
+            </div>
+          )}
+
+          {event.type && (
+            <div className="event-info-item">
+              <Tag size={18} className="event-info-icon" />
+              <div className="event-info-content">
+                <div className="event-info-label">Type</div>
+                <div className="event-info-value">
+                  {eventTypeDisplay(event.type)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {(event.onlineUrl || details?.url) && (
+            <div className="event-info-item online-url">
+              <Video size={18} className="event-info-icon" />
+              <div className="event-info-content">
+                <div className="event-info-label">Lien de connexion</div>
+                <div className="event-info-value">
+                  <a
+                    href={event.onlineUrl || details.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="online-link"
+                  >
+                    Rejoindre la réunion <ExternalLink size={14} style={{ marginLeft: '4px' }} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {details?.comment && (
+            <div className="event-info-item event-comment">
+              <MessageSquare size={18} className="event-info-icon" />
+              <div className="event-info-content">
+                <div className="event-info-label">Commentaire</div>
+                <div className="event-info-value italic-comment">
+                  {renderTextWithLinks(details.comment)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {event.groups && event.groups.length > 0 && (
+            <div className="event-info-item">
+              <Users size={18} className="event-info-icon" />
+              <div className="event-info-content">
+                <div className="event-info-label">Groupes</div>
+                <div className="event-info-value">
+                  {event.groups.join(", ")}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {event.description && (
+            <div className="event-description">
+              <div className="event-info-label">Description</div>
+              <p className="event-description-text">
+                {renderTextWithLinks(event.description)}
+              </p>
+            </div>
+          )}
+
+          {!event.isCustom && (
+            <div className="attendance-actions">
+              <button
+                className={`attendance-action ${missed ? "active missed" : ""}`}
+                onClick={() => toggleMissedEvent(event)}
+              >
+                <div className="attendance-action-main">
+                  {missed ? (
+                    <UserX size={18} className="attendance-action-icon" />
+                  ) : (
+                    <CheckCircle2 size={18} className="attendance-action-icon" />
+                  )}
+                  <span>{missed ? "Cours marqué absent" : "Marquer absent"}</span>
+                </div>
+                <span className="attendance-state-pill">
+                  {missed ? "Actif" : "Off"}
+                </span>
+              </button>
+
+              <button
+                className={`attendance-action ${ignored ? "active ignored" : ""}`}
+                onClick={() => toggleIgnoredEvent(event)}
+              >
+                <div className="attendance-action-main">
+                  <CheckCircle2 size={18} className="attendance-action-icon" />
+                  <span>
+                    {ignored
+                      ? "Cours ignoré (compensation)"
+                      : "Ignorer ce cours (compensation)"}
+                  </span>
+                </div>
+                <span className="attendance-state-pill">
+                  {ignored ? "Actif" : "Off"}
+                </span>
+              </button>
+
+              <button
+                className={`attendance-action ${nonCountable ? "active non-countable" : ""}`}
+                onClick={() => toggleNonCountableEvent(event)}
+              >
+                <div className="attendance-action-main">
+                  <CheckCircle2 size={18} className="attendance-action-icon" />
+                  <span>Ne compte pas dans la présence</span>
+                </div>
+                <span className="attendance-state-pill">
+                  {nonCountable ? "Actif" : "Off"}
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="event-modal-footer">
+          {event.isCustom && onDelete && (
+            <button
+              type="button"
+              className="btn-modal-danger"
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Êtes-vous sûr de vouloir supprimer cet événement personnalisé ?",
+                  )
+                ) {
+                  onDelete(event.id);
+                  onClose();
+                }
+              }}
+            >
+              <Trash2 size={16} />
+              Supprimer l'événement
+            </button>
+          )}
+          <button className="btn-modal-secondary" onClick={onClose}>
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EventModal;

@@ -7,12 +7,14 @@ import {
   FileDown,
   FileUp,
   Github,
+  History,
   LogOut,
   Trash2,
 } from "lucide-react";
 import { createIcsFromEvents, downloadIcsFile } from "../utils/icsExport";
 import { useAttendance } from "../context/AttendanceContext";
 import { logout } from "../api";
+import { switchUiVersion, UI_CLASSIC } from "../utils/uiVersion";
 import "./AppMenu.css";
 
 /**
@@ -218,6 +220,15 @@ const AppMenu = ({
             <Github size={16} strokeWidth={1.75} />
             <span className="bz-menu-label">Better Zeus sur GitHub</span>
           </a>
+          <button
+            type="button"
+            role="menuitem"
+            className="bz-menu-item"
+            onClick={run(() => switchUiVersion(UI_CLASSIC))}
+          >
+            <History size={16} strokeWidth={1.75} />
+            <span className="bz-menu-label">Revenir à l'ancienne interface</span>
+          </button>
 
           <div className="bz-menu-separator" />
           <button

@@ -1,8 +1,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import CalendarContainer from "./components/CalendarContainer";
-import LoginView from "./views/LoginView";
-import { AttendanceProvider } from "./context/AttendanceContext";
+import { getUiVersion, UI_CLASSIC } from "./utils/uiVersion";
+
+// The views are imported lazily (webpack keeps them in this same bundle, see
+// webpack.config.js) so that only the selected interface injects its CSS.
 
 // Show loading state immediately
 showLoadingState();
@@ -135,8 +136,9 @@ function showLoginView() {
   if (mainContent) mainContent.style.display = "none";
 
   // Render the login view
-  const root = createRoot(container);
-  root.render(<LoginView />);
+  import("./views/LoginView").then(({ default: LoginView }) => {
+    createRoot(container).render(<LoginView />);
+  });
 }
 
 function showCalendar() {
@@ -189,11 +191,13 @@ function showCalendar() {
   const zeusRoot = document.querySelector("zeus-root");
   if (zeusRoot) zeusRoot.style.display = "none";
 
-  // Render the React app
-  const root = createRoot(container);
-  root.render(
-    <AttendanceProvider>
-      <CalendarContainer />
-    </AttendanceProvider>,
-  );
+  // Render the selected interface (the new one unless the user opted out).
+  // The classic interface is unmaintained, kept for compatibility only.
+  const loadInterface =
+    getUiVersion() === UI_CLASSIC
+      ? import("./classic/mount")
+      : import("./modernCalendar");
+  loadInterface.then(({ renderCalendar }) => {
+    renderCalendar(createRoot(container));
+  });
 }
